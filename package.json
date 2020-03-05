@@ -4,5 +4,8 @@
   "main": "index.js",
   "repository": "https://github.com/mauriceoegerli/viewtube-api",
   "author": "Maurice Oegerli <maurice@oeger.li>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@feathersjs/feathers": "^4.5.2"
+  }
 }
