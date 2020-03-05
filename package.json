@@ -1,0 +1,8 @@
+{
+  "name": "viewtube-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://mauriceoegerli:61d39bbbe7867f7612c2238cf4c56c1eb04cb317@github.com/mauriceoegerli/viewtube-api",
+  "author": "Maurice Oegerli <maurice@oeger.li>",
+  "license": "MIT"
+}
