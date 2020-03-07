@@ -8,7 +8,7 @@
   },
   "authentication": {
     "entity": "user",
-    "service": "users",
+    "service": "user",
     "secret": "nvePBI8O2xflJWgHJmNlQixcbtc=",
     "authStrategies": ["jwt", "local"],
     "jwtOptions": {

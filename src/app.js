@@ -52,6 +52,6 @@ app.use(express.errorHandler({ logger }))
 
 app.hooks(appHooks)
 
-MongoClient.connect('')
+// MongoClient.connect('')
 
 export default app

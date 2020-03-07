@@ -52,10 +52,12 @@
     "cors": "^2.8.5",
     "feathers-mongodb": "^6.1.0",
     "feathers-nedb": "^5.1.0",
+    "hat": "^0.0.3",
     "helmet": "^3.21.2",
     "mongodb": "^3.5.4",
     "nedb": "^1.8.0",
     "serve-favicon": "^2.5.0",
+    "trek-captcha": "^0.4.0",
     "winston": "^3.0.0"
   },
   "devDependencies": {

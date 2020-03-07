@@ -14,7 +14,7 @@ describe('authentication', () => {
 
     before(async () => {
       try {
-        await service('users').create(userInfo)
+        await service('user').create(userInfo)
       } catch (error) {
         // Do nothing, it just means the user already exists and can be tested
       }

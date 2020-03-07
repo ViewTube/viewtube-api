@@ -8,9 +8,13 @@ const { hashPassword, protect } = localAuthentication.hooks
 
 const username = Joi.string().trim().required()
 const password = Joi.string().trim().min(8).max(255).required()
+const captchaToken = Joi.string().trim().required()
+const captchaSolution = Joi.string().trim().required()
 const schema = Joi.object().keys({
   username,
-  password
+  password,
+  captchaToken,
+  captchaSolution
 })
 
 export default {
@@ -21,7 +25,7 @@ export default {
     create: [hashPassword('password'), validate.form(schema)],
     update: [hashPassword('password'), authenticate('jwt'), validate.form(schema)],
     patch: [hashPassword('password'), authenticate('jwt'), validate.form(schema)],
-    remove: [authenticate('jwt'), validate.form(schema)]
+    remove: [authenticate('jwt')]
   },
   after: {
     all: [
