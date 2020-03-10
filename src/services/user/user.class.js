@@ -5,10 +5,6 @@ export class User extends nedb.Service {
     this.app = app;
   }
 
-  // constructor(options, app) {
-  //   this.model = options.Model
-  // }
-
   async create(data) {
     const Captcha = this.app.service('captcha')
     const captchaVerification = await Captcha.create({ token: data.captchaToken, solution: data.captchaSolution })
