@@ -3,8 +3,6 @@ import localAuthentication from '@feathersjs/authentication-local'
 import Joi from '@hapi/joi'
 import validate from '@feathers-plus/validate-joi'
 
-import { adminRole } from '../../roles.js'
-
 const { authenticate } = authentication.hooks
 const { hashPassword, protect } = localAuthentication.hooks
 

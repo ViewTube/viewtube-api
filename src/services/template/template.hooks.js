@@ -1,5 +1,3 @@
-import { fields } from './fields.js'
-
 export default {
   before: {
     all: [],
@@ -10,9 +8,8 @@ export default {
     patch: [],
     remove: []
   },
-
   after: {
-    all: [fields],
+    all: [],
     find: [],
     get: [],
     create: [],
@@ -20,7 +17,6 @@ export default {
     patch: [],
     remove: []
   },
-
   error: {
     all: [],
     find: [],
@@ -30,4 +26,4 @@ export default {
     patch: [],
     remove: []
   }
-};
+}
