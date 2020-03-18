@@ -11,8 +11,7 @@ export class Video {
     return ytdl.getInfo(url)
       .then(response => {
         const mapper = new Mapper()
-        const video = mapper.dataToVideo(response)
-        return video
+        return mapper.dataToVideo(response)
       })
       .catch(err => {
         throw new Error('Error loading video: ' + err.message)

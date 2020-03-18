@@ -1,65 +1,36 @@
+import { timeSince, removeYoutubeFromUrl, getAuthorThumbnails } from '../../../utility.js'
+
 export class Mapper {
   dataToVideo(source) {
     let video = {}
     try {
       const playerResponse = source.player_response
       const videoDetails = playerResponse.videoDetails
-      const microformatData = playerResponse.microformat.micoformatRenderer
+      const microformatData = playerResponse.microformat.playerMicroformatRenderer
       video = {
-        'type': 'video',
-        'title': source.title,
-        'videoId': source.video_id,
-        'videoThumbnails': videoDetails.thumbnail.thumbnails,
-        'storyboards': [],
-        'description': videoDetails.shortDescription,
-        'descriptionHtml': videoDetails.shortDescription,
-        'published': source.published,
-        'publishedText': microformatData.publishDate,
-        'keywords': [],
-        'viewCount': videoDetails.viewCount,
-        'likeCount': source.likes,
-        'dislikeCount': source.dislikes,
-        'paid': false,
-        'premium': false,
-        'isFamilyFriendly': microformatData.isFamilySafe,
-        'allowedRegions': microformatData.availableCountries,
-        'genre': 'Entertainment',
-        'genreUrl': '/channel/UCi-g4cjqGV7jvU8aeSuj0jQ',
-        'author': videoDetails.author,
-        'authorId': microformatData.externalChannelId,
-        'authorUrl': '/channel/' + microformatData.externalChannelId,
-        'authorThumbnails': [
-          {
-            'url': 'https://yt3.ggpht.com/a/AATXAJxZZO1kL52A99dYcOQHtqTwzRbxZk_f4uDU9g=s32-c-k-c0xffffffff-no-rj-mo',
-            'width': 32,
-            'height': 32
-          },
-          {
-            'url': 'https://yt3.ggpht.com/a/AATXAJxZZO1kL52A99dYcOQHtqTwzRbxZk_f4uDU9g=s48-c-k-c0xffffffff-no-rj-mo',
-            'width': 48,
-            'height': 48
-          },
-          {
-            'url': 'https://yt3.ggpht.com/a/AATXAJxZZO1kL52A99dYcOQHtqTwzRbxZk_f4uDU9g=s76-c-k-c0xffffffff-no-rj-mo',
-            'width': 76,
-            'height': 76
-          },
-          {
-            'url': 'https://yt3.ggpht.com/a/AATXAJxZZO1kL52A99dYcOQHtqTwzRbxZk_f4uDU9g=s100-c-k-c0xffffffff-no-rj-mo',
-            'width': 100,
-            'height': 100
-          },
-          {
-            'url': 'https://yt3.ggpht.com/a/AATXAJxZZO1kL52A99dYcOQHtqTwzRbxZk_f4uDU9g=s176-c-k-c0xffffffff-no-rj-mo',
-            'width': 176,
-            'height': 176
-          },
-          {
-            'url': 'https://yt3.ggpht.com/a/AATXAJxZZO1kL52A99dYcOQHtqTwzRbxZk_f4uDU9g=s512-c-k-c0xffffffff-no-rj-mo',
-            'width': 512,
-            'height': 512
-          }
-        ],
+        type: 'video',
+        title: source.title,
+        videoId: source.video_id,
+        videoThumbnails: videoDetails.thumbnail.thumbnails,
+        storyboards: [],
+        description: videoDetails.shortDescription,
+        descriptionHtml: videoDetails.shortDescription,
+        published: source.published,
+        publishedText: timeSince(new Date(source.published)),
+        keywords: videoDetails.keywords,
+        viewCount: parseInt(videoDetails.viewCount),
+        likeCount: source.likes,
+        dislikeCount: source.dislikes,
+        // paid: false,
+        premium: false, // If it would be premium, it would fail to load
+        isFamilyFriendly: microformatData.isFamilySafe,
+        allowedRegions: microformatData.availableCountries,
+        genre: source.media.category,
+        genreUrl: removeYoutubeFromUrl(source.media.category_url),
+        author: videoDetails.author,
+        authorId: source.author.id,
+        authorUrl: '/channel/' + source.author.id,
+        authorThumbnails: getAuthorThumbnails(source.author.avatar),
         'subCountText': '7.7M',
         'lengthSeconds': source.length_seconds,
         'allowRatings': true,
@@ -2027,9 +1998,5 @@ export class Mapper {
     }
 
     return video
-  }
-
-  parseNumber(numberString) {
-    return parseInt(numberString.replace(/,/g, '').replace(/ /g, ''))
   }
 }
