@@ -7,15 +7,26 @@ export class Video {
   }
 
   async find(params) {
-    const url = 'https://youtube.com/watch?v=' + params.query.id + '&pbj=1'
-    return ytdl.getInfo(url)
-      .then(response => {
-        const mapper = new Mapper()
-        return mapper.dataToVideo(response)
-      })
-      .catch(err => {
-        throw new Error('Error loading video: ' + err.message)
-      })
+    const url = 'https://youtube.com/watch?v=' + params.query.id
+    let response = {}
+    let retryCounter = 0
+    let errorMessage
+    do {
+      try {
+        response = await ytdl.getBasicInfo(url)
+      } catch (err) {
+        console.error(err)
+        errorMessage = err.message
+      }
+      retryCounter++
+    } while (Object.keys(response).length === 0 && retryCounter < 3);
+
+    if (Object.keys(response).length === 0) {
+      throw new Error('Error loading video: ' + errorMessage)
+    }
+
+    const mapper = new Mapper()
+    return mapper.dataToVideo(response)
   }
 
   // async find(params) {

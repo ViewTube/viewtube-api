@@ -1,9 +1,9 @@
-import { ok } from 'assert'
-import { service } from '../src/app'
+import assert from 'assert'
+import app from '../src/app.js'
 
 describe('authentication', () => {
   it('registered the authentication service', () => {
-    ok(service('authentication'))
+    assert.ok(app.service('authentication'))
   })
   
   describe('local strategy', () => {
@@ -14,20 +14,20 @@ describe('authentication', () => {
 
     before(async () => {
       try {
-        await service('user').create(userInfo)
+        await app.service('user').create(userInfo)
       } catch (error) {
         // Do nothing, it just means the user already exists and can be tested
       }
     })
 
     it('authenticates user and creates accessToken', async () => {
-      const { user, accessToken } = await service('authentication').create({
+      const { user, accessToken } = await app.service('authentication').create({
         strategy: 'local',
         ...userInfo
       })
       
-      ok(accessToken, 'Created access token for user')
-      ok(user, 'Includes user in authentication data')
+      assert.ok(accessToken, 'Created access token for user')
+      assert.ok(user, 'Includes user in authentication data')
     })
   })
 })

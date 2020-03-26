@@ -25,7 +25,7 @@
     "yarn": ">= 0.18.0"
   },
   "scripts": {
-    "test": "yarn run lint && yarn run mocha",
+    "test": "yarn run mocha",
     "lint": "eslint src/. test/. --config .eslintrc.json",
     "serve": "nodemon src/",
     "start": "node src/",
@@ -61,6 +61,7 @@
     "serve-favicon": "^2.5.0",
     "trek-captcha": "^0.4.0",
     "winston": "^3.0.0",
+    "youtube-dl": "^3.0.2",
     "ytdl-core": "^2.0.0"
   },
   "devDependencies": {

@@ -1,11 +1,11 @@
-import { strict as assert } from 'assert'
-import { get } from 'axios'
+import assert from 'assert'
+import axios from 'axios'
 import { format } from 'url'
-import { get as _get, listen } from '../src/app'
+import app from '../src/app.js'
 
-const port = _get('port') || 8998
+const port = app.get('port') || 8998
 const getUrl = pathname => format({
-  hostname: _get('host') || 'localhost',
+  hostname: app.get('host') || 'localhost',
   protocol: 'http',
   port,
   pathname
@@ -15,7 +15,7 @@ describe('Feathers application tests', () => {
   let server
 
   before(function (done) {
-    server = listen(port)
+    server = app.listen(port)
     server.once('listening', () => done())
   })
 
@@ -24,7 +24,7 @@ describe('Feathers application tests', () => {
   })
 
   it('starts and shows the index page', async () => {
-    const { data } = await get(getUrl())
+    const { data } = await axios.get(getUrl())
 
     assert.ok(data.indexOf('<html lang="en">') !== -1)
   })
@@ -32,7 +32,7 @@ describe('Feathers application tests', () => {
   describe('404', function () {
     it('shows a 404 HTML page', async () => {
       try {
-        await get(getUrl('path/to/nowhere'), {
+        await axios.get(getUrl('path/to/nowhere'), {
           headers: {
             'Accept': 'text/html'
           }
@@ -48,7 +48,7 @@ describe('Feathers application tests', () => {
 
     it('shows a 404 JSON error without stack trace', async () => {
       try {
-        await get(getUrl('path/to/nowhere'), {
+        await axios.get(getUrl('path/to/nowhere'), {
           json: true
         })
         assert.fail('should never get here')
