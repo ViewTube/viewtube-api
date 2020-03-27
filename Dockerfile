@@ -17,5 +17,6 @@ USER root
 COPY . $HOME
 RUN chown -R app $HOME/*
 
+EXPOSE 3030
 USER app
 CMD ["npm", "start"]
