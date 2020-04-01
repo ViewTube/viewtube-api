@@ -34,11 +34,15 @@ export function timeSince(date) {
 }
 
 export function removeYoutubeFromUrl(url) {
-  return url
-    .replace('https://www.youtube.com', '')
-    .replace('https://youtube.com', '')
-    .replace('http://www.youtube.com')
-    .replace('http://youtube.com', '')
+  if (url) {
+    return url
+      .replace('https://www.youtube.com', '')
+      .replace('https://youtube.com', '')
+      .replace('http://www.youtube.com')
+      .replace('http://youtube.com', '')
+  } else {
+    return '#'
+  }
 }
 
 export function getVideoThumbnails(id) {

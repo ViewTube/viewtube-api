@@ -11,9 +11,13 @@ export class Video {
     let response = {}
     let retryCounter = 0
     let errorMessage
+    let mappedData = {}
     do {
       try {
         response = await ytdl.getBasicInfo(url)
+        console.log(response)
+        const mapper = new Mapper()
+        mappedData = mapper.dataToVideo(response)
       } catch (err) {
         console.error(err)
         errorMessage = err.message
@@ -25,8 +29,7 @@ export class Video {
       throw new Error('Error loading video: ' + errorMessage)
     }
 
-    const mapper = new Mapper()
-    return mapper.dataToVideo(response)
+    return mappedData
   }
 
   // async find(params) {
