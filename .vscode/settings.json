@@ -1,0 +1,11 @@
+{
+  "actionButtons": {
+    "commands": [
+      {
+        "name": "run",
+        "command": "yarn serve"
+      }
+    ]
+  },
+  "javascript.suggest.autoImports": false
+}
