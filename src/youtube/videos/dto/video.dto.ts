@@ -1,3 +1,37 @@
-export class Video{
-    
+export class Video {
+  type: string;
+  title: string;
+  videoId: string;
+  videoThumbnails: Array<object>;
+  storyboards: object;
+  description: string;
+  descriptionHtml: string;
+  published: number;
+  publishedText: string;
+  keywords: Array<string>;
+  viewCount: number;
+  likeCount: number;
+  dislikeCount: number;
+  paid: boolean;
+  premium: boolean;
+  isFamilyFriendly: boolean;
+  allowedRegions: Array<string>;
+  genre: string;
+  genreUrl: string;
+  author: string;
+  authorId: string;
+  authorUrl: string;
+  authorThumbnails: Array<object>;
+  subCountText: string;
+  lengthSeconds: number;
+  allowRatings: boolean;
+  rating: number;
+  isListed: boolean;
+  liveNow: boolean;
+  isUpcoming: boolean;
+  dashUrl: string;
+  adaptiveFormats: Array<object>;
+  formatStreams: Array<object>;
+  captions: object;
+  recommendedVideos: Array<object>;
 }
