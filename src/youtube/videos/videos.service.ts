@@ -11,6 +11,7 @@ export class VideosService {
     try {
       const result: videoInfo = await getBasicInfo(url);
       const video: IVideo = new VideoEntity(result);
+      return video;
     } catch (err) {
       console.error(err);
       throw new HttpException(

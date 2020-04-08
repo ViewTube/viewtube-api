@@ -1,131 +1,159 @@
 import { videoInfo } from 'ytdl-core';
 import { IVideo } from './interfaces/video.interface';
 import { Common } from '../common';
-import { Expose } from 'class-transformer';
+import { Expose, Exclude } from 'class-transformer';
 
 export class VideoEntity implements IVideo {
-  constructor(private source: Partial<videoInfo>) {
-    Object.assign(this, source);
+  constructor(private _source: Partial<videoInfo>) {
+    Object.assign(this, _source);
   }
 
-  playerResponse = this.source.player_response;
+  @Exclude()
+  channelSubCount = 0;
+
+  @Exclude()
+  playerResponse = this._source.player_response;
+
+  @Exclude()
   videoDetails = this.playerResponse.videoDetails;
+
+  @Exclude()
   microformatData = this.playerResponse.microformat.playerMicroformatRenderer;
 
   type = 'video';
 
   title: string;
 
-  @Expose({ name: 'videoId' })
-  video_id: string;
+  videoId: string = this._source.video_id;
 
-  videoThumbnails = Common.getVideoThumbnails(this.source.video_id);
+  videoThumbnails = Common.getVideoThumbnails(this._source.video_id);
 
-  storyboards = [];
+  storyboards: Array<object> = [];
 
   description: string;
 
-  descriptionHtml = this.source.description;
+  descriptionHtml: string = this._source.description;
 
   published: number;
 
-  publishedText = Common.timeSince(new Date(this.source.published));
+  publishedText: string = Common.timeSince(new Date(this._source.published));
 
-  keywords = this.videoDetails.keywords;
+  keywords: Array<string> = this.videoDetails.keywords;
 
-  viewCount = this.videoDetails.viewCount;
+  viewCount: number = this.videoDetails.viewCount;
 
-  @Expose({ name: 'likeCount' })
-  likes: number;
+  likeCount: number = this._source.likes;
 
-  @Expose({ name: 'dislikeCount' })
-  dislikes: number;
+  dislikeCount: number = this._source.dislikes;
 
-  paid = playerResponse.paidContentOverlay !== undefined;
+  @Expose()
+  get paid(): boolean {
+    return (this.playerResponse as any)?.paidContentOverlay !== undefined;
+  }
 
   premium = false; // If it would be premium, it would fail to load
 
-  isFamilyFriendly = microformatData.isFamilySafe;
+  isFamilyFriendly: boolean = this.microformatData.isFamilySafe;
 
-  allowedRegions = microformatData.availableCountries;
+  allowedRegions: Array<string> = this.microformatData.availableCountries;
 
-  genre = source.media.category;
+  genre: string = this._source.media.category;
 
-  genreUrl = removeYoutubeFromUrl(source.media.category_url);
+  genreUrl: string = Common.removeYoutubeFromUrl(
+    this._source.media.category_url,
+  );
 
-  author = videoDetails.author;
+  author: string = this.videoDetails.author;
 
-  authorId = source.author.id;
+  authorId: string = this._source.author.id;
 
-  authorUrl = '/channel/' + source.author.id;
+  authorUrl: string = '/channel/' + this._source.author.id;
 
-  authorThumbnails = getAuthorThumbnails(source.author.avatar);
+  authorThumbnails: Array<object> = Common.getAuthorThumbnails(
+    this._source.author.avatar,
+  );
 
-  subCountText = channelSubCount;
+  authorVerified: boolean = this._source.author.verified;
 
-  lengthSeconds = source.length_seconds;
+  subCountText: string = this.channelSubCount.toString();
 
-  allowRatings = videoDetails.allowRatings;
+  lengthSeconds: number = parseInt(this._source.length_seconds) || 0;
 
-  rating = videoDetails.averageRating;
+  allowRatings: boolean = (this.videoDetails as any)?.allowRatings;
 
-  isListed = !microformatData.isUnlisted;
+  rating: string = this._source.avg_rating;
 
-  liveNow = videoDetails.isLiveContent;
+  isListed = !this.microformatData.isUnlisted;
 
-  isUpcoming =
-    playerResponse.playabilityStatus.status === 'LIVE_STREAM_OFFLINE' &&
-    new Date(
-      playerResponse.playabilityStatus.liveStreamability.liveStreamabilityRenderer.offlineSlate.liveStreamOfflineSlateRenderer.scheduledStartTime,
-    ) > new Date.now();
+  liveNow: boolean = this.videoDetails.isLiveContent;
 
-  dashUrl = 'https://invidio.us/api/manifest/dash/id/' + source.video_id;
+  @Expose()
+  get isUpcoming(): boolean {
+    return (
+      this.playerResponse.playabilityStatus.status === 'LIVE_STREAM_OFFLINE' &&
+      new Date(
+        (this.playerResponse
+          .playabilityStatus as any)?.liveStreamability?.liveStreamabilityRenderer.offlineSlate.liveStreamOfflineSlateRenderer.scheduledStartTime,
+      ).valueOf() > Date.now()
+    );
+  }
 
-  adaptiveFormats = playerResponse.streamingData.adaptiveFormats;
+  dashUrl: string =
+    'https://invidio.us/api/manifest/dash/id/' + this._source.video_id;
 
-  formatStreams = source.formats
-    .filter(value => {
-      return value.bitrate !== undefined && value.audioQuality !== undefined;
-    })
-    .map(vid => {
-      if (vid.src !== undefined) {
-        return vid;
-      } else {
-        if (vid.cipher !== undefined) {
-          const url = vid.cipher.replace('url=', '');
-          vid.src = decodeURI(url);
+  adaptiveFormats: Array<object> = this.playerResponse.streamingData
+    .adaptiveFormats;
+
+  @Expose()
+  get formatStreams(): Array<object> {
+    return this._source.formats
+      .filter(value => {
+        return value.bitrate !== undefined && value.audioQuality !== undefined;
+      })
+      .map(vid => {
+        const video = vid as any;
+        if (video.src !== undefined) {
+          return vid;
+        } else {
+          if (video.cipher !== undefined) {
+            const url = video.cipher.replace('url=', '');
+            video.src = decodeURI(url);
+          }
+          return vid;
         }
-        return vid;
-      }
-    });
+      });
+  }
 
-  captionTracks =
-    playerResponse.captions.playerCaptionsTracklistRenderer.captionTracks;
+  captionTracks: Array<any> = this.playerResponse.captions
+    .playerCaptionsTracklistRenderer.captionTracks;
 
-  captions = captionTracks
-    ? captionTracks.map(value => {
+  captions: Array<any> = this.captionTracks
+    ? this.captionTracks.map(value => {
         return {
           label: value.name.simpleText,
           languageCode: value.languageCode,
-          url: `/api/v1/captions/${source.video_id}?label=${encodeURIComponent(
-            value.name.simpleText,
-          )}`,
+          url: `/api/v1/captions/${
+            this._source.video_id
+          }?label=${encodeURIComponent(value.name.simpleText)}`,
         };
       })
     : [];
 
-  recommendedVideos = source.related_videos.map(vid => {
+  recommendedVideos: Array<object> = this._source.related_videos.map(vid => {
+    const video = vid as any;
     return {
-      videoId: vid.id,
-      title: vid.title,
-      videoThumbnails: getVideoThumbnails(vid.id),
-      author: vid.author,
-      authorUrl: `/channel/${vid.ucid}`,
-      authorId: vid.ucid,
-      authorThumbnails: getAuthorThumbnailsForRecommended(vid.author_thumbnail),
-      lengthSeconds: vid.length_seconds,
-      viewCountText: vid.short_view_count_text,
-      viewCount: vid.view_count,
+      videoId: video.id,
+      title: video.title,
+      videoThumbnails: Common.getVideoThumbnails(video.id),
+      author: video.author,
+      authorUrl: `/channel/${video.video_id}`,
+      authorId: video.video_id,
+      authorThumbnails: Common.getAuthorThumbnailsForRecommended(
+        video.author_thumbnail,
+      ),
+      lengthSeconds: video.length_seconds,
+      viewCountText: video.short_view_count_text,
+      viewCount: video.view_count,
     };
   });
 }

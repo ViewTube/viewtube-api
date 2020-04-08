@@ -22,10 +22,11 @@ export interface IVideo {
   authorId: string;
   authorUrl: string;
   authorThumbnails: Array<object>;
+  authorVerified: boolean;
   subCountText: string;
   lengthSeconds: number;
   allowRatings: boolean;
-  rating: number;
+  rating: string;
   isListed: boolean;
   liveNow: boolean;
   isUpcoming: boolean;
