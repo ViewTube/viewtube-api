@@ -1,8 +1,8 @@
-export class Video {
+export interface IVideo {
   type: string;
   title: string;
   videoId: string;
-  videoThumbnails: Array<object>;
+  videoThumbnails: object;
   storyboards: object;
   description: string;
   descriptionHtml: string;
