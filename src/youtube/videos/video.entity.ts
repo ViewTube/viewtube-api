@@ -63,7 +63,7 @@ export class VideoEntity implements IVideo {
     this._source.media.category_url,
   );
 
-  author: string = this.videoDetails.author;
+  author: string = this._source.author.name;
 
   authorId: string = this._source.author.id;
 
