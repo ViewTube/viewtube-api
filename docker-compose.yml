@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  viewtube-api:
+    container_name: viewtube-api
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/data
+    ports:
+      - 3030:3030
