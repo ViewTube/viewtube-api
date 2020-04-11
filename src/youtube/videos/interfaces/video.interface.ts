@@ -34,5 +34,16 @@ export interface IVideo {
   adaptiveFormats: Array<object>;
   formatStreams: Array<object>;
   captions: object;
-  recommendedVideos: Array<object>;
+  recommendedVideos: Array<{
+    videoId: string;
+    title: string;
+    videoThumbnails: Array<any>;
+    author: string;
+    authorUrl: string;
+    authorId: string;
+    authorThumbnails: Array<any>;
+    lengthSeconds: number;
+    viewCountText: string;
+    viewCount: number;
+  }>;
 }

@@ -4,9 +4,7 @@ import { Common } from '../common';
 import { Expose, Exclude } from 'class-transformer';
 
 export class VideoEntity implements IVideo {
-  constructor(private _source: Partial<videoInfo>) {
-    Object.assign(this, _source);
-  }
+  constructor(private _source: Partial<videoInfo>) {}
 
   @Exclude()
   channelSubCount = 0;
@@ -55,8 +53,6 @@ export class VideoEntity implements IVideo {
 
   isFamilyFriendly: boolean = this.microformatData.isFamilySafe;
 
-  allowedRegions: Array<string> = this.microformatData.availableCountries;
-
   genre: string = this._source.media.category;
 
   genreUrl: string = Common.removeYoutubeFromUrl(
@@ -74,6 +70,8 @@ export class VideoEntity implements IVideo {
   );
 
   authorVerified: boolean = this._source.author.verified;
+
+  allowedRegions: Array<string> = this.microformatData.availableCountries;
 
   subCountText: string = this.channelSubCount.toString();
 
@@ -139,7 +137,7 @@ export class VideoEntity implements IVideo {
       })
     : [];
 
-  recommendedVideos: Array<object> = this._source.related_videos.map(vid => {
+  recommendedVideos = this._source.related_videos.map(vid => {
     const video = vid as any;
     return {
       videoId: video.id,
