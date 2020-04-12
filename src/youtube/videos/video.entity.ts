@@ -20,7 +20,7 @@ export class VideoEntity implements IVideo {
 
   type = 'video';
 
-  title: string;
+  title: string = this._source.title;
 
   videoId: string = this._source.video_id;
 
@@ -28,11 +28,11 @@ export class VideoEntity implements IVideo {
 
   storyboards: Array<object> = [];
 
-  description: string;
+  description: string = this._source.description;
 
   descriptionHtml: string = this._source.description;
 
-  published: number;
+  published: number = this._source.published;
 
   publishedText: string = Common.timeSince(new Date(this._source.published));
 
