@@ -7,9 +7,6 @@ export class VideoEntity implements IVideo {
   constructor(private _source: Partial<videoInfo>) {}
 
   @Exclude()
-  channelSubCount = 0;
-
-  @Exclude()
   playerResponse = this._source.player_response;
 
   @Exclude()
@@ -73,7 +70,7 @@ export class VideoEntity implements IVideo {
 
   allowedRegions: Array<string> = this.microformatData.availableCountries;
 
-  subCountText: string = this.channelSubCount.toString();
+  subCount: number = this._source.author.subscriber_count;
 
   lengthSeconds: number = parseInt(this._source.length_seconds) || 0;
 
