@@ -17,6 +17,9 @@ lerna-debug.log*
 /coverage
 /.nyc_output
 
+# Secrets
+ormconfig.json
+
 # IDEs and editors
 /.idea
 .project
@@ -32,4 +35,3 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-ormconfig.json
