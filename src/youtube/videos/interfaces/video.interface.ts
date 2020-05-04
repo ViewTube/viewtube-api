@@ -23,7 +23,7 @@ export interface IVideo {
   authorUrl: string;
   authorThumbnails: Array<object>;
   authorVerified: boolean;
-  subCountText: string;
+  subCount: number;
   lengthSeconds: number;
   allowRatings: boolean;
   rating: string;
