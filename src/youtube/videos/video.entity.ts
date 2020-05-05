@@ -35,7 +35,11 @@ export class VideoEntity implements IVideo {
 
   keywords: Array<string> = this.videoDetails.keywords;
 
-  viewCount: number = this.videoDetails.viewCount;
+  @Expose()
+  get viewCount(): number {
+    // Result of viewCount not predicable
+    return parseFloat(this.videoDetails.viewCount.toString());
+  }
 
   likeCount: number = this._source.likes;
 
@@ -102,10 +106,10 @@ export class VideoEntity implements IVideo {
   @Expose()
   get formatStreams(): Array<object> {
     return this._source.formats
-      .filter(value => {
+      .filter((value) => {
         return value.bitrate !== undefined && value.audioQuality !== undefined;
       })
-      .map(vid => {
+      .map((vid) => {
         const video = vid as any;
         if (video.src !== undefined) {
           return vid;
@@ -123,7 +127,7 @@ export class VideoEntity implements IVideo {
     .playerCaptionsTracklistRenderer.captionTracks;
 
   captions: Array<any> = this.captionTracks
-    ? this.captionTracks.map(value => {
+    ? this.captionTracks.map((value) => {
         return {
           label: value.name.simpleText,
           languageCode: value.languageCode,
@@ -134,7 +138,7 @@ export class VideoEntity implements IVideo {
       })
     : [];
 
-  recommendedVideos = this._source.related_videos.map(vid => {
+  recommendedVideos = this._source.related_videos.map((vid) => {
     const video = vid as any;
     return {
       videoId: video.id,
