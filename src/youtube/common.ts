@@ -108,76 +108,49 @@ export class Common {
   }
 
   public static getAuthorThumbnails(url: string): Array<object> {
-    if (url) {
-      const id = url.replace(/=s.*-c-k-c0xffffffff-no-rj-mo/i, '');
-      return [
-        {
-          url: id + '=s32-c-k-c0xffffffff-no-rj-mo',
-          width: 32,
-          height: 32,
-        },
-        {
-          url: id + '=s48-c-k-c0xffffffff-no-rj-mo',
-          width: 48,
-          height: 48,
-        },
-        {
-          url: id + '=s76-c-k-c0xffffffff-no-rj-mo',
-          width: 76,
-          height: 76,
-        },
-        {
-          url: id + '=s100-c-k-c0xffffffff-no-rj-mo',
-          width: 100,
-          height: 100,
-        },
-        {
-          url: id + '=s176-c-k-c0xffffffff-no-rj-mo',
-          width: 176,
-          height: 176,
-        },
-        {
-          url: id + '=s512-c-k-c0xffffffff-no-rj-mo',
-          width: 512,
-          height: 512,
-        },
-      ];
-    } else {
-      return [];
-    }
+    const regex = /(.*=s)(.*)(-c-k-c.*)/;
+    return this.createThumbnailUrls(url, (res: number) => {
+      return url.replace(regex, (_, p1, p2, p3) => `${p1}${res}${p3}`);
+    });
   }
 
   public static getAuthorThumbnailsForRecommended(url: string): Array<object> {
-    if (url) {
-      const id = url.replace(/s.*-c-k-no-mo-rj-c0xffffff\/photo.jpg/i, '');
+    const regex = /(.*\/s)(.*)(-c-k-no.*)/;
+    return this.createThumbnailUrls(url, (res: number) => {
+      return url.replace(regex, (_, p1, p2, p3) => `${p1}${res}${p3}`);
+    });
+  }
+
+  public static createThumbnailUrls(baseUrl: string, replaceFn: Function) {
+    if (baseUrl) {
       return [
         {
-          url: id + '/s32-c-k-no-mo-rj-c0xffffff/photo.jpg',
+          url: replaceFn(32),
           width: 32,
           height: 32,
         },
         {
-          url: id + '/s48-c-k-no-mo-rj-c0xffffff/photo.jpg',
+          url: replaceFn(48),
           width: 48,
           height: 48,
         },
         {
-          url: id + '/s76-c-k-no-mo-rj-c0xffffff/photo.jpg',
+          url: replaceFn(76),
           width: 76,
           height: 76,
         },
         {
-          url: id + '/s100-c-k-no-mo-rj-c0xffffff/photo.jpg',
+          url: replaceFn(100),
           width: 100,
           height: 100,
         },
         {
-          url: id + '/s176-c-k-no-mo-rj-c0xffffff/photo.jpg',
+          url: replaceFn(176),
           width: 176,
           height: 176,
         },
         {
-          url: id + '/s512-c-k-no-mo-rj-c0xffffff/photo.jpg',
+          url: replaceFn(512),
           width: 512,
           height: 512,
         },
