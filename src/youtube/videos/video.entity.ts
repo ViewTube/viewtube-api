@@ -2,6 +2,7 @@ import { videoInfo } from 'ytdl-core';
 import { IVideo } from './interfaces/video.interface';
 import { Common } from '../common';
 import { Expose, Exclude } from 'class-transformer';
+import humanizeDuration from 'humanize-duration';
 
 export class VideoEntity implements IVideo {
   constructor(private _source: Partial<videoInfo>) {}
@@ -31,7 +32,14 @@ export class VideoEntity implements IVideo {
 
   published: number = this._source.published;
 
-  publishedText: string = Common.timeSince(new Date(this._source.published));
+  @Expose()
+  get publishedText(): string {
+    const durationString = humanizeDuration(
+      new Date().valueOf() - new Date(this._source.published).valueOf(),
+      { largest: 1 },
+    );
+    return `${durationString} ago`;
+  }
 
   keywords: Array<string> = this.videoDetails.keywords;
 

@@ -2,40 +2,6 @@ export class Common {
   public static readonly youtubeVideoUrl: string =
     'https://youtube.com/watch?v=';
 
-  public static timeSince(date: Date) {
-    const seconds = Math.floor((new Date().valueOf() - date.valueOf()) / 1000);
-
-    let interval = Math.floor(seconds / 31536000);
-
-    const agoText = 'ago';
-
-    if (interval >= 1) {
-      const text = interval === 1 ? ' year ' : ' years ';
-      return interval + text + agoText;
-    }
-    interval = Math.floor(seconds / 2592000);
-    if (interval >= 1) {
-      const text = interval === 1 ? ' month ' : ' months ';
-      return interval + text + agoText;
-    }
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) {
-      const text = interval === 1 ? ' day ' : ' days ';
-      return interval + text + agoText;
-    }
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1) {
-      const text = interval === 1 ? ' year ' : ' years ';
-      return interval + text + agoText;
-    }
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1) {
-      const text = interval === 1 ? ' minute ' : ' minutes ';
-      return interval + text + agoText;
-    }
-    return Math.floor(seconds) + ' seconds';
-  }
-
   public static removeYoutubeFromUrl(url: string): string {
     if (url) {
       return url
