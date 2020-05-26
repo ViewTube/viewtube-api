@@ -4,12 +4,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { YoutubeModule } from './youtube/youtube.module';
 import { UserModule } from './user/user.module';
+import { RegisterModule } from './register/register.module';
 
 @Module({
   imports: [
     YoutubeModule,
     MongooseModule.forRoot('mongodb://localhost/viewtube'),
     UserModule,
+    RegisterModule,
   ],
   controllers: [AppController],
   providers: [AppService],
