@@ -108,8 +108,14 @@ export class VideoEntity implements IVideo {
   dashUrl: string =
     'https://invidio.us/api/manifest/dash/id/' + this._source.video_id;
 
-  adaptiveFormats: Array<object> = this.playerResponse.streamingData
-    .adaptiveFormats;
+  @Expose()
+  get adaptiveFormats(): Array<object> {
+    if (this.playerResponse.streamingData) {
+      return this.playerResponse.streamingData.adaptiveFormats;
+    } else {
+      return [];
+    }
+  }
 
   @Expose()
   get formatStreams(): Array<object> {
@@ -132,7 +138,7 @@ export class VideoEntity implements IVideo {
   }
 
   captionTracks: Array<any> = this.playerResponse.captions
-    .playerCaptionsTracklistRenderer.captionTracks;
+    ?.playerCaptionsTracklistRenderer?.captionTracks;
 
   captions: Array<any> = this.captionTracks
     ? this.captionTracks.map((value) => {

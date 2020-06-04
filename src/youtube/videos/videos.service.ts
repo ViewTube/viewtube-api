@@ -15,7 +15,7 @@ export class VideosService {
     } catch (err) {
       console.error(err);
       throw new HttpException(
-        'Error loading video',
+        err.message,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
