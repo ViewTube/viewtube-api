@@ -35,4 +35,4 @@ ormconfig.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-src/constants.ts
+data/*
