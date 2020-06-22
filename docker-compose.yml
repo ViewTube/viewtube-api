@@ -7,9 +7,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - VIEWTUBE_DATABASE_HOST=viewtube-mongodb:27017
+    links:
+      - viewtube-mongodb
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data:/data
     ports:
-      - 3030:3030
+      - 3031:3030
+
+  viewtube-mongodb:
+    container_name: viewtube-mongodb
+    restart: always
+    image: mongo
+    ports:
+     - 27017:27017
