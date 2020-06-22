@@ -11,7 +11,7 @@ import { CaptchaModule } from './captcha/captcha.module';
 @Module({
   imports: [
     YoutubeModule,
-    MongooseModule.forRoot('mongodb://localhost/viewtube', {
+    MongooseModule.forRoot(`mongodb://${process.env.VIEWTUBE_DATABASE_HOST}/viewtube`, {
       user: process.env.VIEWTUBE_DATABASE_USER,
       pass: process.env.VIEWTUBE_DATABASE_PASSWORD
     }),
