@@ -1,5 +1,5 @@
 FROM node:14.3-alpine
-WORKDIR /usr/src/app
+WORKDIR /home/app/api
 
 COPY . .
 RUN \
