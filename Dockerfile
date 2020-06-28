@@ -3,7 +3,7 @@ WORKDIR /home/app/api
 
 COPY package.json yarn.lock ./
 RUN \
-  apk add yarn && \
+  apk add yarn ffmpeg ffprobe && \
   yarn install
 
 COPY . .
