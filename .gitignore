@@ -36,3 +36,4 @@ ormconfig.json
 !.vscode/launch.json
 !.vscode/extensions.json
 data/*
+output/*
