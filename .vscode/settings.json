@@ -7,5 +7,6 @@
       }
     ]
   },
-  "javascript.suggest.autoImports": false
+  "javascript.suggest.autoImports": false,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
