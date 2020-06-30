@@ -7,7 +7,7 @@ import { VideoplaybackService } from './videoplayback/videoplayback.service';
 @Module({
   imports: [
     CacheModule.register({
-      ttl: 100,
+      ttl: 300,
       max: 200,
     }),
   ],
