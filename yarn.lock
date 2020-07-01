@@ -3253,6 +3253,11 @@ flatted@^2.0.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-2.0.2.tgz#4575b21e2bcee7434aa9be662f4b7b5f9c2b5138"
   integrity sha512-r5wGx7YeOwNWNlCA0wQ86zKyDLMQr+/RB8xy74M4hTphfmjlijTSSXGuH8rnvKZnfT9i+75zmd8jcKdMR4O6jA==
 
+fluent-ffmpeg-multistream@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/fluent-ffmpeg-multistream/-/fluent-ffmpeg-multistream-1.0.0.tgz#e4bdae0128337f7274e882e7d0c84f7fe2792ea4"
+  integrity sha512-wWampD8JAYY4Y/UHogqT0ilaxWWLD3vs0ybxsm2perp3ctL0Zq1hE+tIs2oehYBMKgsEPvuxV8aEbjyK+1NUBQ==
+
 fluent-ffmpeg@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/fluent-ffmpeg/-/fluent-ffmpeg-2.1.2.tgz#c952de2240f812ebda0aa8006d7776ee2acf7d74"
