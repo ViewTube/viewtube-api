@@ -34,6 +34,7 @@
     "cache-manager": "^3.2.1",
     "class-transformer": "^0.2.3",
     "fluent-ffmpeg": "^2.1.2",
+    "fluent-ffmpeg-multistream": "^1.0.0",
     "hat": "^0.0.3",
     "humanize-duration": "^3.22.0",
     "mongoose": "^5.9.15",
