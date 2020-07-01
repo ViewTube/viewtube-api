@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
-import { stringify } from 'querystring';
+import fetch from 'node-fetch'
 
 @Injectable()
 export class AutocompleteService {
@@ -10,7 +9,15 @@ export class AutocompleteService {
   private responseRegex = new RegExp(/(window\.google\.ac\.h\()(.*)(\))/);
 
   async getAutocompleteResult(query: string): Promise<Array<string>> {
-    const data: string = (await axios.get(this.url + query)).data;
+    const data: string = await fetch(this.url + query, {
+      headers:{ charset: 'utf-8', 'Content-Type': 'text/plain' },
+    })
+      .then((response) => response.text())
+      .then((e) => {
+        console.log(e);
+        return e;
+      });
+    console.log(data);
     const array: Array<any> = JSON.parse(data.match(this.responseRegex)[2]);
     return array[1].map((e: any) => e[0]);
   }
