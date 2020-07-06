@@ -5,13 +5,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Captcha } from './schemas/captcha.schema';
 import { CaptchaDto } from './dto/captcha.dto';
 import { Model } from 'mongoose';
-import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class CaptchaService {
   constructor(
-    @InjectModel(Captcha.name) private readonly captchaModel: Model<Captcha>,
-    private schedulerRegistry: SchedulerRegistry
+    @InjectModel(Captcha.name) private readonly captchaModel: Model<Captcha>
   ) { }
 
   async getCaptcha(): Promise<CaptchaDto> {
@@ -26,8 +24,6 @@ export class CaptchaService {
       solution: token,
     });
     createdCaptcha.save();
-
-    
 
     const captchaResponse: CaptchaDto = {
       token: clientToken,
