@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { CaptchaModule } from './captcha/captcha.module';
 import { AutocompleteController } from './autocomplete/autocomplete.controller';
 import { AutocompleteService } from './autocomplete/autocomplete.service';
+import { RegisterController } from './register/register.controller';
+import { RegisterService } from './register/register.service';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { AutocompleteService } from './autocomplete/autocomplete.service';
     ConfigModule.forRoot(),
     CaptchaModule,
   ],
-  controllers: [AppController, AutocompleteController],
-  providers: [AppService, AutocompleteService],
+  controllers: [AppController, AutocompleteController, RegisterController],
+  providers: [AppService, AutocompleteService, RegisterService],
 })
 export class AppModule {}

@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Captcha } from './schemas/captcha.schema';
 import { CaptchaDto } from './dto/captcha.dto';
 import { Model } from 'mongoose';
+import { randomBytes } from 'crypto'
 
 @Injectable()
 export class CaptchaService {
@@ -15,7 +16,7 @@ export class CaptchaService {
   async getCaptcha(): Promise<CaptchaDto> {
     const { token, buffer } = await captcha({ size: 6 });
 
-    const clientToken = hat();
+    const clientToken = randomBytes(32).toString('hex');
 
     const captchaImage = buffer.toString('base64');
 
@@ -23,7 +24,7 @@ export class CaptchaService {
       clientToken,
       solution: token,
     });
-    createdCaptcha.save();
+    await createdCaptcha.save();
 
     const captchaResponse: CaptchaDto = {
       token: clientToken,
@@ -33,10 +34,21 @@ export class CaptchaService {
     return captchaResponse;
   }
 
-  async validateCaptcha(token: string, solution: string) {
-    const captcha = await this.captchaModel
+  validateCaptcha(token: string, solution: string): Promise<boolean> {
+    return this.captchaModel
       .findOne({ clientToken: token })
-      .exec();
-    console.log(captcha);
+      .exec().then((value: Captcha) => {
+        if (value.solution === solution) {
+          return true;
+        }
+        return false;
+      }, (err) => {
+        console.error(err);
+        return false;
+      });
+  }
+
+  deleteCaptcha(token: string): void {
+    this.captchaModel.deleteOne({ clientToken: token }).exec().then(console.log, console.error);
   }
 }
