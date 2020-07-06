@@ -3,15 +3,18 @@ import captcha from 'trek-captcha';
 import hat from 'hat';
 import { InjectModel } from '@nestjs/mongoose';
 import { Captcha } from './schemas/captcha.schema';
+import { CaptchaDto } from './dto/captcha.dto';
 import { Model } from 'mongoose';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class CaptchaService {
   constructor(
     @InjectModel(Captcha.name) private readonly captchaModel: Model<Captcha>,
-  ) {}
+    private schedulerRegistry: SchedulerRegistry
+  ) { }
 
-  async getCaptcha(): Promise<any> {
+  async getCaptcha(): Promise<CaptchaDto> {
     const { token, buffer } = await captcha({ size: 6 });
 
     const clientToken = hat();
@@ -22,7 +25,16 @@ export class CaptchaService {
       clientToken,
       solution: token,
     });
-    return createdCaptcha.save();
+    createdCaptcha.save();
+
+    
+
+    const captchaResponse: CaptchaDto = {
+      token: clientToken,
+      captchaImage: `data:image/gif;base64,${captchaImage}`
+    };
+
+    return captchaResponse;
   }
 
   async validateCaptcha(token: string, solution: string) {
