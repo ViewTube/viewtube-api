@@ -8,9 +8,10 @@ import { CaptchaController } from './captcha.controller';
   providers: [CaptchaService],
   imports: [
     MongooseModule.forFeature([
-      { name: Captcha.name, schema: CaptchaSchema, collection: 'captchas'  },
+      { name: Captcha.name, schema: CaptchaSchema, collection: 'captchas' },
     ])
   ],
   controllers: [CaptchaController],
+  exports: [CaptchaService]
 })
 export class CaptchaModule { }
