@@ -15,11 +15,10 @@ async function bootstrap() {
   .setDescription(packageJson.description)
   .setVersion(packageJson.version)
   .setLicense(packageJson.license, '../LICENSE')
-  .addTag('videos')
   .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, documentOptions);
-  SwaggerModule.setup('api', app, swaggerDocument);
+  SwaggerModule.setup('/', app, swaggerDocument);
 
   app.enableCors();
   await app.listen(port);

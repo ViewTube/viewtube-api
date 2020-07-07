@@ -5,10 +5,9 @@ import { LocalAuthGuard } from './auth/guards/local.guard';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-  @UseGuards(LocalAuthGuard)
 
-  @Get()
-  getHello(): object {
+  @Get('status')
+  getStatus(): object {
     return this.appService.getStatus();
   }
 }

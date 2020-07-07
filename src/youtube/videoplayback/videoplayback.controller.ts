@@ -6,7 +6,7 @@ import { Response } from 'express';
 export class VideoplaybackController {
   constructor(private videoplaybackService: VideoplaybackService) {}
 
-  @Get(':id.mp4')
+  @Get(':id/default.mp4')
   getVideoplayback(@Res() response: Response, @Param('id') id: string) {
     this.videoplaybackService.getVideoStream(id, response);
   }
