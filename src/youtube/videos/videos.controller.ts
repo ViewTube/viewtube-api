@@ -8,6 +8,7 @@ import {
   CacheInterceptor,
 } from '@nestjs/common';
 import { VideosService } from './videos.service';
+import { VideoDto } from './dto/video.dto';
 
 @UseInterceptors(CacheInterceptor)
 @Controller('videos')
@@ -19,7 +20,7 @@ export class VideosController {
     excludePrefixes: ['_'],
   })
   @Get(':id')
-  getVideos(@Param('id') id: string): object {
+  getVideos(@Param('id') id: string): Promise<VideoDto> {
     return this.videosService.getById(id);
   }
 }

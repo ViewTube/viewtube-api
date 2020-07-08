@@ -1,4 +1,4 @@
-export interface CaptchaDto {
+export class CaptchaDto {
   token: string;
   captchaImage: string;
 }

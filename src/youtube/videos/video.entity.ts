@@ -1,11 +1,11 @@
 import { videoInfo } from 'ytdl-core';
-import { IVideo } from './interfaces/video.interface';
+import { VideoDto } from './dto/video.dto';
 import { Common } from '../common';
 import { Expose, Exclude } from 'class-transformer';
 import humanizeDuration from 'humanize-duration';
 
-export class VideoEntity implements IVideo {
-  constructor(private _source: Partial<videoInfo>) {}
+export class VideoEntity implements VideoDto {
+  constructor(private _source: Partial<videoInfo>) { }
 
   @Exclude()
   playerResponse = this._source.player_response;
@@ -142,31 +142,34 @@ export class VideoEntity implements IVideo {
 
   captions: Array<any> = this.captionTracks
     ? this.captionTracks.map((value) => {
-        return {
-          label: value.name.simpleText,
-          languageCode: value.languageCode,
-          url: `/api/v1/captions/${
-            this._source.video_id
+      return {
+        label: value.name.simpleText,
+        languageCode: value.languageCode,
+        url: `/api/v1/captions/${
+          this._source.video_id
           }?label=${encodeURIComponent(value.name.simpleText)}`,
-        };
-      })
+      };
+    })
     : [];
 
-  recommendedVideos = this._source.related_videos.map((vid) => {
-    const video = vid as any;
-    return {
-      videoId: video.id,
-      title: video.title,
-      videoThumbnails: Common.getVideoThumbnails(video.id),
-      author: video.author,
-      authorUrl: `/channel/${video.video_id}`,
-      authorId: video.video_id,
-      authorThumbnails: Common.getAuthorThumbnailsForRecommended(
-        video.author_thumbnail,
-      ),
-      lengthSeconds: video.length_seconds,
-      viewCountText: video.short_view_count_text,
-      viewCount: video.view_count,
-    };
-  });
+  @Expose()
+  get recommendedVideos() {
+    return this._source.related_videos.map((vid) => {
+      const video = vid as any;
+      return {
+        videoId: video.id,
+        title: video.title,
+        videoThumbnails: Common.getVideoThumbnails(video.id),
+        author: video.author,
+        authorUrl: `/channel/${video.video_id}`,
+        authorId: video.video_id,
+        authorThumbnails: Common.getAuthorThumbnailsForRecommended(
+          video.author_thumbnail,
+        ),
+        lengthSeconds: video.length_seconds,
+        viewCountText: video.short_view_count_text,
+        viewCount: video.view_count,
+      };
+    });
+  }
 }

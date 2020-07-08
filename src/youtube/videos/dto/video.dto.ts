@@ -1,4 +1,6 @@
-export interface IVideo {
+import { RecommendedVideoDto } from "./recommended-video.dto";
+
+export class VideoDto {
   type: string;
   title: string;
   videoId: string;
@@ -34,16 +36,5 @@ export interface IVideo {
   adaptiveFormats: Array<object>;
   formatStreams: Array<object>;
   captions: object;
-  recommendedVideos: Array<{
-    videoId: string;
-    title: string;
-    videoThumbnails: Array<any>;
-    author: string;
-    authorUrl: string;
-    authorId: string;
-    authorThumbnails: Array<any>;
-    lengthSeconds: number;
-    viewCountText: string;
-    viewCount: number;
-  }>;
+  recommendedVideos: Array<RecommendedVideoDto>;
 }
