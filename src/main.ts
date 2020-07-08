@@ -11,10 +11,10 @@ async function bootstrap() {
   const port = configService.get('PORT');
 
   const documentOptions = new DocumentBuilder()
-  .setTitle('ViewTube API')
+  .setTitle('ViewTube-API')
   .setDescription(packageJson.description)
   .setVersion(packageJson.version)
-  .setLicense(packageJson.license, '../LICENSE')
+  .setLicense(packageJson.license, 'https://raw.githubusercontent.com/mauriceoegerli/viewtube-api/master/LICENSE')
   .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, documentOptions);
