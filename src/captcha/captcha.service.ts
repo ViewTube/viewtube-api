@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import captcha from 'trek-captcha';
-import hat from 'hat';
 import { InjectModel } from '@nestjs/mongoose';
 import { Captcha } from './schemas/captcha.schema';
 import { CaptchaDto } from './dto/captcha.dto';
@@ -17,7 +16,6 @@ export class CaptchaService {
     const { token, buffer } = await captcha({ size: 6 });
 
     const clientToken = randomBytes(32).toString('hex');
-
     const captchaImage = buffer.toString('base64');
 
     const createdCaptcha = new this.captchaModel({
@@ -38,7 +36,7 @@ export class CaptchaService {
     return this.captchaModel
       .findOne({ clientToken: token })
       .exec().then((value: Captcha) => {
-        if (value.solution === solution) {
+        if (value && value.solution === solution) {
           return true;
         }
         return false;

@@ -3,6 +3,8 @@ import { VideoDto } from './dto/video.dto';
 import { Common } from '../common';
 import { Expose, Exclude } from 'class-transformer';
 import humanizeDuration from 'humanize-duration';
+import { AuthorThumbnailDto } from './dto/author-thumbnail.dto';
+import { VideoThumbnailDto } from './dto/video-thumbnail.dto';
 
 export class VideoEntity implements VideoDto {
   constructor(private _source: Partial<videoInfo>) { }
@@ -22,7 +24,7 @@ export class VideoEntity implements VideoDto {
 
   videoId: string = this._source.video_id;
 
-  videoThumbnails = Common.getVideoThumbnails(this._source.video_id);
+  videoThumbnails: Array<VideoThumbnailDto> = Common.getVideoThumbnails(this._source.video_id);
 
   storyboards: Array<object> = [];
 
@@ -74,7 +76,7 @@ export class VideoEntity implements VideoDto {
 
   authorUrl: string = '/channel/' + this._source.author.id;
 
-  authorThumbnails: Array<object> = Common.getAuthorThumbnails(
+  authorThumbnails: Array<AuthorThumbnailDto> = Common.getAuthorThumbnails(
     this._source.author.avatar,
   );
 

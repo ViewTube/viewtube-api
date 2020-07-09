@@ -5,7 +5,7 @@ import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 import { Readable } from 'stream';
 import { Response } from 'express';
-import { StreamInput } from '../streamInput';
+import { StreamInput } from '../stream-input';
 
 @Injectable()
 export class VideoplaybackService {

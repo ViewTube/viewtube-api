@@ -3,23 +3,41 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { UserDto } from './user.dto';
+import bcrypt from 'bcrypt';
+import { UserprofileDto } from 'src/auth/dto/userprofile.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
-  ) {}
+  ) { }
 
-  async create(user: UserDto): Promise<User> {
+  async create(user: UserDto): Promise<UserprofileDto> {
+    console.log('creating user...');
     const existingUser: null | User = await this.findOne(user.username);
-    if (existingUser) {
+    if (existingUser !== null) {
+      console.log('user already exists');
       throw new HttpException(
         `User ${existingUser.username} already exists`,
         400,
       );
     } else {
-      const createdUser = new this.userModel(user);
-      return createdUser.save();
+      const saltRounds = 10;
+      let hash: string;
+      try {
+        hash = await bcrypt.hash(user.password, saltRounds);
+      } catch (err) {
+        console.error(err);
+        throw new HttpException('Error registering user', 403);
+      }
+
+      const createdUser = await new this.userModel({
+        username: user.username,
+        password: hash
+      }).save();
+      return {
+        username: createdUser.username
+      };
     }
   }
 
