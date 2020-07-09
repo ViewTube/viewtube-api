@@ -8,18 +8,21 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async validateUser(username: string, pw: string) {
     const user = await this.userService.findOne(username);
     if (user) {
-      bcrypt.compare(pw, user.password, (err, same) => {
-        if (same === true) {
+      try {
+        const comparison = await bcrypt.compare(pw, user.password);
+        if (comparison === true) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { password, ...result } = user;
           return result;
         }
-      });
+      } catch (err) {
+        console.error(err);
+      }
     }
     return null;
   }
@@ -29,6 +32,4 @@ export class AuthService {
       accessToken: this.jwtService.sign({ username }),
     };
   }
-
-  // async register(): void {}
 }

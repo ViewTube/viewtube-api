@@ -8,7 +8,6 @@ export class RegisterService {
   constructor(private captchaService: CaptchaService, private userService: UserService) { }
 
   async registerUser(userRegistration: RegistrationDto) {
-    console.log(userRegistration);
     const captchaVerified: boolean = await this.captchaService
       .validateCaptcha(userRegistration.captchaToken, userRegistration.captchaSolution);
     if (captchaVerified) {

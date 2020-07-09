@@ -14,10 +14,8 @@ export class AutocompleteService {
     })
       .then((response) => response.text())
       .then((e) => {
-        console.log(e);
         return e;
       });
-    console.log(data);
     const array: Array<any> = JSON.parse(data.match(this.responseRegex)[2]);
     return array[1].map((e: any) => e[0]);
   }
