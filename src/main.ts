@@ -15,6 +15,7 @@ async function bootstrap() {
     .setDescription(packageJson.description)
     .setVersion(packageJson.version)
     .setLicense(packageJson.license, 'https://raw.githubusercontent.com/mauriceoegerli/viewtube-api/master/LICENSE')
+    .addBearerAuth()
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, documentOptions);

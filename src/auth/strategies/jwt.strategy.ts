@@ -10,7 +10,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey: process.env.VIEWTUBE_JWT_SECRET,
       issuer: 'viewtube-api',
-      audience: 'viewtube-web'
+      audience: 'viewtube-web',
     });
   }
 
