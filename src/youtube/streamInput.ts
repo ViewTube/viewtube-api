@@ -1,21 +1,21 @@
 import net from 'net';
 import fs from 'fs';
-import path from 'path';
+// import path from 'path';
 
 let counter = 0;
 class UnixStream {
   url: string;
 
   constructor(stream, onSocket) {
-    // const sockPath = './' + ++counter + '.sock';
-    const sockPath = 400 + ++counter;
-    this.url = 'unix:' + path;
+    const sockPath = `output/${++counter}.sock`;
+    this.url = 'unix:' + sockPath;
 
-    // try {
-    //   fs.statSync(sockPath);
-    //   fs.unlinkSync(sockPath);
-    // } catch (err) {}
+    try {
+      fs.statSync(sockPath);
+      fs.unlinkSync(sockPath);
+    } catch (err) {}
     const server = net.createServer(onSocket);
+    stream.on('error', console.error)
     stream.on('finish', () => {
       server.close();
     });

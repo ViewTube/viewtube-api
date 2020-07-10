@@ -22,14 +22,42 @@ export class VideoplaybackService {
     // }
     const videoStream = ytdl(url, {
       filter: (format) => format.container === 'mp4' && !format.audioBitrate,
-    });
+    }).on('error', console.error);
+
     const audioStream = ytdl(url, {
       quality: 'lowestaudio',
       range: { start: rangeStart },
       filter: (format) => format.container === 'mp4' && !format.qualityLabel,
     })
-      .on('info', (_, videoFormat: ytdl.videoFormat) => {
-        console.log(videoFormat);
+      .on('info', (videoInfo, videoFormat: ytdl.videoFormat) => {
+        console.log(videoInfo, videoFormat);
+        const audio = videoInfo.formats[23].url;
+        const video = videoInfo.formats[4].url;
+        ffmpeg()
+          .input(video)
+          .videoCodec('copy')
+          .input(audio)
+          .audioCodec('copy')
+          .format('ismv')
+          // .save(this.combinedOutput)
+          // .concat(res, { end: true })
+          .videoCodec('libx264')
+          .on('progress', (videoProgress) => console.log(videoProgress))
+          .on('end', () => {
+            fs.unlink(audioOutput, (err) => {
+              if (err) {
+                console.log('unlink error:\n' + err);
+              } else {
+                console.log('done');
+              }
+            });
+          })
+          .on('error', (err: Error, stdout, stderr) => {
+            console.log('ffmpeg error:\n' + err.message);
+            console.log('ffmpeg stdout:\n' + stdout);
+            console.log('ffmpeg stderr:\n' + stderr);
+          })
+          .pipe(res, { end: true });
       })
       .on('error', console.error)
       .on('progress', (chunkLength, downloaded, total) => {
@@ -38,31 +66,6 @@ export class VideoplaybackService {
       .on('finish', () => {
         console.log('done with audio');
       });
-    ffmpeg()
-      .input(StreamInput(videoStream).url as any)
-      .videoCodec('copy')
-      .input(StreamInput(audioStream).url as any)
-      .audioCodec('copy')
-      .format('ismv')
-      // .save(this.combinedOutput)
-      // .concat(res, { end: true })
-      .videoCodec('libx264')
-      .on('progress', (videoProgress) => console.log(videoProgress))
-      .on('end', () => {
-        fs.unlink(audioOutput, (err) => {
-          if (err) {
-            console.log('unlink error:\n' + err);
-          } else {
-            console.log('done');
-          }
-        });
-      })
-      .on('error', (err: Error, stdout, stderr) => {
-        console.log('ffmpeg error:\n' + err.message);
-        console.log('ffmpeg stdout:\n' + stdout);
-        console.log('ffmpeg stderr:\n' + stderr);
-      })
-      .pipe(res, { end: true });
   }
 
   logProgress(chunkLength, downloaded, total, string) {
