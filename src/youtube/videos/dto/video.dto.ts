@@ -1,10 +1,12 @@
 import { RecommendedVideoDto } from "./recommended-video.dto";
+import { VideoThumbnailDto } from "./video-thumbnail.dto";
+import { AuthorThumbnailDto } from "./author-thumbnail.dto";
 
 export class VideoDto {
   type: string;
   title: string;
   videoId: string;
-  videoThumbnails: object;
+  videoThumbnails: Array<VideoThumbnailDto>;
   storyboards: object;
   description: string;
   descriptionHtml: string;
@@ -23,7 +25,7 @@ export class VideoDto {
   author: string;
   authorId: string;
   authorUrl: string;
-  authorThumbnails: Array<object>;
+  authorThumbnails: Array<AuthorThumbnailDto>;
   authorVerified: boolean;
   subCount: number;
   lengthSeconds: number;
