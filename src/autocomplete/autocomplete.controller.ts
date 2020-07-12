@@ -6,7 +6,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AutocompleteService } from './autocomplete.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Core')
 @UseInterceptors(CacheInterceptor)
 @Controller('autocomplete')
 export class AutocompleteController {

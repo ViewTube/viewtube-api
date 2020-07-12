@@ -1,14 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
 import { CaptchaService } from './captcha.service';
 import { CaptchaDto } from './dto/captcha.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
-@ApiTags('User')
-@Controller('captcha')
+@ApiTags('Auth')
+@Controller('auth')
 export class CaptchaController {
-  constructor(private captchaService: CaptchaService) {}
+  constructor(private captchaService: CaptchaService) { }
 
-  @Get()
+  @Get('captcha')
+  @ApiOperation({ summary: 'Get a captcha' })
   async getCaptcha(): Promise<CaptchaDto> {
     return this.captchaService.getCaptcha();
   }

@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { VideosService } from './videos.service';
 import { VideoDto } from './dto/video.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Core')
 @UseInterceptors(CacheInterceptor)
 @Controller('videos')
 export class VideosController {

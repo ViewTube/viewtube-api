@@ -1,6 +1,6 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { RegistrationDto } from './dto/registration.dto';
-import { CaptchaService } from 'src/captcha/captcha.service';
+import { CaptchaService } from 'src/auth/captcha/captcha.service';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()

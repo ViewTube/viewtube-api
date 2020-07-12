@@ -3,11 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { YoutubeModule } from './youtube/youtube.module';
+import { YoutubeModule } from './core/core.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { CaptchaModule } from './captcha/captcha.module';
-import { RegisterModule } from './register/register.module';
+import { CaptchaModule } from './auth/captcha/captcha.module';
 import { AutocompleteModule } from './autocomplete/autocomplete.module';
 
 @Module({
@@ -22,7 +21,6 @@ import { AutocompleteModule } from './autocomplete/autocomplete.module';
     CaptchaModule,
     ConfigModule.forRoot(),
     CaptchaModule,
-    RegisterModule,
     AutocompleteModule,
   ],
   controllers: [AppController],
