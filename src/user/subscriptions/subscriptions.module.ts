@@ -10,7 +10,7 @@ import { Subscription, SubscriptionSchema } from './schemas/subscription.schema'
     MongooseModule.forFeature([
       { name: Video.name, schema: VideoSchema, collection: 'videos' },
       { name: Subscription.name, schema: SubscriptionSchema, collection: 'subscriptions' }
-    ])
+    ]),
   ],
   controllers: [SubscriptionsController],
   providers: [SubscriptionsService],

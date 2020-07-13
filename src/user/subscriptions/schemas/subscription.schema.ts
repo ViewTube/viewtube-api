@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Subscription extends Document {
   @Prop({ index: { unique: true } })
   username: string;
