@@ -4,7 +4,6 @@ import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
 import { VideoDto } from 'src/core/videos/dto/video.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-import { Request } from 'express';
 
 @ApiTags('User')
 @UseGuards(JwtAuthGuard)

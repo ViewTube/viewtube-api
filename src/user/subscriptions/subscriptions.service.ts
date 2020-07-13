@@ -15,7 +15,7 @@ export class SubscriptionsService {
       throw new HttpException('No subscriptions', 404);
     })
   }
-  async getSubscriptionFeed(username: string): Promise<Array<VideoDto>> { }
+  async getSubscriptionFeed(username: string): Promise<Array<VideoDto>> { return null; }
 
   async getSubscription(username: string, channelId: string): Promise<SubscriptionStatusDto> {
     const user = await this.subscriptionModel.findOne({ username }).exec();
@@ -32,22 +32,13 @@ export class SubscriptionsService {
   }
 
   async subscribeToChannel(username: string, channelId: string): Promise<SubscriptionStatusDto> {
-    let user = await this.subscriptionModel.findOne({ username }).exec();
+    const user = await this.subscriptionModel.findOne({ username }).exec();
 
-    if (!user) {
-      user = new this.subscriptionModel({
-        username,
-        subscriptions: []
-      });
-    }
+    const subscriptions = user ? user.subscriptions : [];
+    subscriptions.push({ channelId });
 
-    if (!user.subscriptions.find(e => e.channelId === channelId)) {
-      user.subscriptions.push({
-        channelId
-      });
-    }
-
-    await user.save();
+    await this.subscriptionModel
+      .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true }).exec();
 
     return {
       channelId,
@@ -57,8 +48,13 @@ export class SubscriptionsService {
 
   async unsubscribeFromChannel(username: string, channelId: string): Promise<SubscriptionStatusDto> {
     const user = await this.subscriptionModel.findOne({ username }).exec();
-    if (user) {
-      user.subscriptions = user.subscriptions.filter(e => e.channelId === channelId);
+    if (
+      user &&
+      user.subscriptions &&
+      user.subscriptions.length > 0 &&
+      user.subscriptions.find(e => e.channelId === channelId)
+    ) {
+      user.subscriptions = user.subscriptions.filter(e => e.channelId !== channelId);
       await user.save();
 
       return {

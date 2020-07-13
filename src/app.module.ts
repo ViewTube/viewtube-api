@@ -11,7 +11,10 @@ import { UserModule } from './user/user.module';
   imports: [
     MongooseModule.forRoot(`mongodb://${process.env.VIEWTUBE_DATABASE_HOST}/viewtube`, {
       user: process.env.VIEWTUBE_DATABASE_USER,
-      pass: process.env.VIEWTUBE_DATABASE_PASSWORD
+      pass: process.env.VIEWTUBE_DATABASE_PASSWORD,
+      useNewUrlParser: true,
+      useFindAndModify: false,
+      useCreateIndex: true
     }),
     CoreModule,
     UserModule,

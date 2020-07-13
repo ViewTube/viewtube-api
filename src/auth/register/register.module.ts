@@ -7,6 +7,7 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   providers: [RegisterService],
   controllers: [RegisterController],
-  imports: [CaptchaModule, UserModule]
+  imports: [CaptchaModule, UserModule],
+  exports: [RegisterService]
 })
 export class RegisterModule { }

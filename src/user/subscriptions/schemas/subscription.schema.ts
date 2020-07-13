@@ -6,6 +6,7 @@ export class Subscription extends Document {
   @Prop({ index: { unique: true } })
   username: string;
 
+  @Prop({type: Array, required: true })
   subscriptions: Array<{ channelId: string }>
 }
 

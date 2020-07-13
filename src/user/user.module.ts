@@ -13,7 +13,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     SubscriptionsModule,
   ],
   providers: [UserService],
-  exports: [UserService],
-  controllers: [UserController]
+  controllers: [UserController],
+  exports: [UserService]
 })
-export class UserModule {}
+export class UserModule { }
