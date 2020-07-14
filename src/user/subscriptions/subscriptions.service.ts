@@ -32,13 +32,14 @@ export class SubscriptionsService {
       const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
         .map((video: any) => this.convertRssVideo(video))
       return videos;
-    }).catch(err => console.log('error')))
+    }).catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`)))
 
     Promise.allSettled(feedRequests)
       .then((results: any) => {
-        if (results.find((e: any) => e.value)) {
-          const videoValues = results.filter((e: any) => e.value);
-          const videos: Array<VideoBasicInfoDto> = videoValues.reduce((el, { value }) => [...el, ...value], []);
+        if (results.find((promiseResult: any) => promiseResult.value)) {
+          const videoValues = results.filter((promiseResult: any) => promiseResult.value);
+          const videos: Array<VideoBasicInfoDto> = videoValues
+            .reduce((promiseResult: any, { value }) => [...promiseResult, ...value], []);
 
           videos.forEach(element => {
             this.videoModel.findOneAndUpdate({ videoId: element.videoId, }, element, { upsert: true }).exec().catch(console.log);
