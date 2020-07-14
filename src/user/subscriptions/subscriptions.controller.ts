@@ -2,8 +2,8 @@ import { Controller, Get, Put, Param, Post, Delete, Req, UseGuards } from '@nest
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
-import { VideoDto } from 'src/core/videos/dto/video.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { VideoBasicInfoDto } from 'src/core/videos/dto/video-basic-info.dto';
 
 @ApiTags('User')
 @UseGuards(JwtAuthGuard)
@@ -18,7 +18,7 @@ export class SubscriptionsController {
   }
 
   @Get('videos')
-  async getSubscriptionVideos(@Req() req: any): Promise<Array<VideoDto>> {
+  async getSubscriptionVideos(@Req() req: any): Promise<Array<VideoBasicInfoDto>> {
     return this.subscriptionsService.getSubscriptionFeed(req.user.username);
   }
 

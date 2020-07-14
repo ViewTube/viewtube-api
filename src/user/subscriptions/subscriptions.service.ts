@@ -2,23 +2,22 @@ import { Injectable, HttpException } from '@nestjs/common';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
 import { VideoDto } from 'src/core/videos/dto/video.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Video } from 'src/core/videos/schemas/video.schema';
+import { VideoBasicInfo } from 'src/core/videos/schemas/video-basic-info.schema';
 import { Model } from 'mongoose';
 import { Subscription } from './schemas/subscription.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import xmlParser from "xml2json";
 import fetch from 'node-fetch'
-import fs from 'fs'
 import { VideoBasicInfoDto } from 'src/core/videos/dto/video-basic-info.dto';
 import { Common } from 'src/core/common';
 
 @Injectable()
 export class SubscriptionsService {
-  constructor(@InjectModel(Video.name) private readonly videoModel: Model<Video>, @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>) { }
+  constructor(@InjectModel(VideoBasicInfo.name) private readonly videoModel: Model<VideoBasicInfo>, @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>) { }
 
   private feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
 
-  // @Cron('0 * * * * *')
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async collectSubscriptionsJob(): Promise<void> {
     const users = await this.subscriptionModel.find().lean(true).exec();
     const channelIds = users.reduce((val, { subscriptions }) => [...val, ...subscriptions.map(e => e.channelId)], []);
@@ -36,9 +35,15 @@ export class SubscriptionsService {
     }).catch(err => console.log('error')))
 
     Promise.allSettled(feedRequests)
-      .then(results => {
-        console.log('done');
-        fs.writeFileSync('pussy.json', results);
+      .then((results: any) => {
+        if (results.find((e: any) => e.value)) {
+          const videoValues = results.filter((e: any) => e.value);
+          const videos: Array<VideoBasicInfoDto> = videoValues.reduce((el, { value }) => [...el, ...value], []);
+
+          videos.forEach(element => {
+            this.videoModel.findOneAndUpdate({ videoId: element.videoId, }, element, { upsert: true }).exec().catch(console.log);
+          })
+        }
       })
   }
 
@@ -64,8 +69,8 @@ export class SubscriptionsService {
 
   convertStarsToLikesDislikes({ totalRatings, avgStarRatings }): { likes: number, dislikes: number } {
     const likeRatio = (avgStarRatings - 1) / 4;
-    const likes = totalRatings * likeRatio;
-    const dislikes = totalRatings * (1 - likeRatio);
+    const likes = Math.round(totalRatings * likeRatio);
+    const dislikes = Math.round(totalRatings * (1 - likeRatio));
     return { likes, dislikes };
   }
 
@@ -75,7 +80,21 @@ export class SubscriptionsService {
     })
   }
 
-  async getSubscriptionFeed(username: string): Promise<Array<VideoDto>> { return null; }
+  async getSubscriptionFeed(username: string): Promise<Array<VideoBasicInfoDto>> {
+    const userSubscriptions = await this.subscriptionModel.findOne({ username }).lean().exec();
+    return this.videoModel.find((err, vid: VideoBasicInfo) => {
+      if (err) console.log(err)
+      return userSubscriptions.subscriptions
+        .map(channel => channel.channelId)
+        .includes(vid.authorId);
+    }).sort({ published: -1 }).limit(30).map((el: any) => {
+      delete el._id;
+      delete el.__v;
+      return el;
+    }).catch(err => {
+      throw new HttpException(`Error fetching subscription feed: ${err}`, 500);
+    });
+  }
 
   async getSubscription(username: string, channelId: string): Promise<SubscriptionStatusDto> {
     const user = await this.subscriptionModel.findOne({ username }).exec();
