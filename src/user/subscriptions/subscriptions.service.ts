@@ -27,11 +27,14 @@ export class SubscriptionsService {
       if (response.ok) {
         return response.text();
       }
+      return null;
     }).then(data => {
-      const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
-      const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
-        .map((video: any) => this.convertRssVideo(video))
-      return videos;
+      if (data) {
+        const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
+        const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
+          .map((video: any) => this.convertRssVideo(video))
+        return videos;
+      }
     }).catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`)))
 
     Promise.allSettled(feedRequests)
