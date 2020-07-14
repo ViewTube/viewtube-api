@@ -15,6 +15,9 @@ export class VideoBasicInfo extends Document implements VideoBasicInfoDto {
   published: number;
 
   @Prop()
+  publishedText: string;
+
+  @Prop()
   author: string;
 
   @Prop()

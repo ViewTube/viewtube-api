@@ -10,6 +10,7 @@ import xmlParser from "xml2json";
 import fetch from 'node-fetch'
 import { VideoBasicInfoDto } from 'src/core/videos/dto/video-basic-info.dto';
 import { Common } from 'src/core/common';
+import humanizeDuration from 'humanize-duration';
 
 @Injectable()
 export class SubscriptionsService {
@@ -57,6 +58,11 @@ export class SubscriptionsService {
       { totalRatings: rating.count, avgStarRatings: rating.average }
     );
 
+    const durationString = humanizeDuration(
+      new Date().valueOf() - Date.parse(video.published).valueOf(),
+      { largest: 1 },
+    );
+
     return {
       videoId: video['yt:videoId'],
       title: video.title,
@@ -64,6 +70,7 @@ export class SubscriptionsService {
       authorId: video['yt:channelId'],
       description: video['media:group']['media:description'],
       published: Date.parse(video.published),
+      publishedText: durationString,
       videoThumbnails: Common.getVideoThumbnails(video['yt:videoId']),
       viewCount: video['media:group']['media:community']['media:statistics'].views,
       likeCount: likes,
