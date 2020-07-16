@@ -121,7 +121,10 @@ export class SubscriptionsService {
         }
       }
     }
-    throw new HttpException('Subscription not found', 404);
+    return {
+      channelId,
+      isSubscribed: false
+    }
   }
 
   async subscribeToChannel(username: string, channelId: string): Promise<SubscriptionStatusDto> {
