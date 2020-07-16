@@ -35,7 +35,7 @@ export class AuthService {
     const { accessToken } = await this.login(username);
     const domain = this.configService.get('VIEWTUBE_CURRENT_DOMAIN');
     const expiration = this.configService.get('VIEWTUBE_JWT_EXPIRATION_TIME');
-    return `Authentication=${accessToken}; HttpOnly=true; Secure=true; Domain=${domain} Max-Age=${expiration}`;
+    return `Authentication=${accessToken}; HttpOnly=true; Secure=true; Domain=${domain}; Max-Age=${expiration}`;
   }
 
   async login(username: string) {
