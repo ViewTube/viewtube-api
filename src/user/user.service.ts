@@ -13,10 +13,8 @@ export class UserService {
   ) { }
 
   async create(user: UserDto): Promise<UserprofileDto> {
-    console.log('creating user...');
     const existingUser: null | User = await this.findOne(user.username);
     if (existingUser !== null) {
-      console.log('user already exists');
       throw new HttpException(
         `User ${existingUser.username} already exists`,
         400,

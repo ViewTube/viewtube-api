@@ -14,7 +14,6 @@ async function bootstrap() {
   if(configService.get('NODE_ENV') !== 'production'){
     corsDomains.push('http://localhost:8066')
   }
-  console.log(corsDomains);
   app.enableCors({
     origin: corsDomains,
     credentials: true
