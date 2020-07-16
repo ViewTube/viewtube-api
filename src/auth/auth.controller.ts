@@ -18,4 +18,11 @@ export class AuthController {
     response.send(await this.authService.login(user.username))
     // return this.authService.login(user.username);
   }
+
+  @Post('logout')
+  async logout(@Res() response: Response) {
+    const cookie = this.authService.getDeletionCookie();
+    response.setHeader('Set-Cookie', cookie);
+    response.status(200).send();
+  }
 }

@@ -30,9 +30,18 @@ export class AuthService {
     return null;
   }
 
+  getDeletionCookie() {
+    let domainString = '';
+    if (this.configService.get('NODE_ENV') === 'production') {
+      domainString = `Domain=${this.configService.get('VIEWTUBE_CURRENT_DOMAIN')}; `;
+    }
+    const expiration = 0;
+    return `Authentication=; HttpOnly=true; Secure=true; Path=/; ${domainString}Max-Age=${expiration}`;
+  }
+
   async getJwtCookie(username: string) {
     const { accessToken } = await this.login(username);
-    let domainString = 'null';
+    let domainString = '';
     if (this.configService.get('NODE_ENV') === 'production') {
       domainString = `Domain=${this.configService.get('VIEWTUBE_CURRENT_DOMAIN')}; `;
     }
