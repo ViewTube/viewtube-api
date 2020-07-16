@@ -93,23 +93,26 @@ export class SubscriptionsService {
 
   async getSubscriptionFeed(username: string): Promise<Array<VideoBasicInfoDto>> {
     const userSubscriptions = await this.subscriptionModel.findOne({ username }).lean().exec();
-    return this.videoModel.find((err, vid: VideoBasicInfo) => {
-      if (err) console.log(err)
-      return userSubscriptions.subscriptions
-        .map(channel => channel.channelId)
-        .includes(vid.authorId);
-    }).sort({ published: -1 }).limit(30).map((el: any) => {
-      delete el._id;
-      delete el.__v;
-      return el;
-    }).catch(err => {
-      throw new HttpException(`Error fetching subscription feed: ${err}`, 500);
-    });
+    if (userSubscriptions) {
+      return this.videoModel.find((err, vid: VideoBasicInfo) => {
+        if (err) console.log(err)
+        return userSubscriptions.subscriptions
+          .map(channel => channel.channelId)
+          .includes(vid.authorId);
+      }).sort({ published: -1 }).limit(30).map((el: any) => {
+        delete el._id;
+        delete el.__v;
+        return el;
+      }).catch(err => {
+        throw new HttpException(`Error fetching subscription feed: ${err}`, 500);
+      });
+    }
+    throw new HttpException(`Error fetching subscription feed, found no subscriptions`, 404);
   }
 
   async getSubscription(username: string, channelId: string): Promise<SubscriptionStatusDto> {
     const user = await this.subscriptionModel.findOne({ username }).exec();
-    if (user.subscriptions.length > 0) {
+    if (user && user.subscriptions.length > 0) {
       const subscription = user.subscriptions.find(e => e.channelId === channelId);
       if (subscription) {
         return {
