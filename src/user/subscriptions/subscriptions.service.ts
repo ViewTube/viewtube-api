@@ -1,8 +1,8 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
-import { VideoDto } from 'src/core/videos/dto/video.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { VideoBasicInfo } from 'src/core/videos/schemas/video-basic-info.schema';
+import { ChannelBasicInfo } from 'src/core/channels/schemas/channel-basic-info.schema';
 import { Model } from 'mongoose';
 import { Subscription } from './schemas/subscription.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -14,7 +14,11 @@ import humanizeDuration from 'humanize-duration';
 
 @Injectable()
 export class SubscriptionsService {
-  constructor(@InjectModel(VideoBasicInfo.name) private readonly videoModel: Model<VideoBasicInfo>, @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>) { }
+  constructor(
+    @InjectModel(VideoBasicInfo.name) private readonly videoModel: Model<VideoBasicInfo>,
+    @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>,
+    @InjectModel(ChannelBasicInfo.name) private readonly channelModel: Model<ChannelBasicInfo>
+  ) { }
 
   private feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
 
@@ -33,7 +37,15 @@ export class SubscriptionsService {
       if (data) {
         const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
         const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
-          .map((video: any) => this.convertRssVideo(video))
+          .map((video: any) => this.convertRssVideo(video));
+
+        const channel = {
+          authorId: jsonData.feed['yt:channelId'],
+          author: jsonData.feed.author.name,
+          authorUrl: jsonData.feed.author.uri
+        }
+
+        this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true }).exec().catch(console.log);
         return videos;
       }
     }).catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`)))
@@ -86,9 +98,15 @@ export class SubscriptionsService {
   }
 
   async getSubscribedChannels(username: string) {
-    return this.subscriptionModel.find({ username }).exec().catch(err => {
+    const userChannelIds = (await this.subscriptionModel.findOne({ username }).exec().catch(err => {
       throw new HttpException('No subscriptions', 404);
-    })
+    })).subscriptions.map(e => e.channelId);
+    if (userChannelIds) {
+      return this.channelModel.find({ authorId: { $in: userChannelIds } }).catch(err => {
+        console.log(err);
+      })
+    }
+    throw new HttpException('No subscriptions', 404);
   }
 
   async getSubscriptionFeed(username: string): Promise<Array<VideoBasicInfoDto>> {
