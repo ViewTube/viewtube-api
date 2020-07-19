@@ -16,8 +16,8 @@ import humanizeDuration from 'humanize-duration';
 export class SubscriptionsService {
   constructor(
     @InjectModel(VideoBasicInfo.name) private readonly videoModel: Model<VideoBasicInfo>,
+    @InjectModel(ChannelBasicInfo.name) private readonly channelModel: Model<ChannelBasicInfo>,
     @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>,
-    @InjectModel(ChannelBasicInfo.name) private readonly channelModel: Model<ChannelBasicInfo>
   ) { }
 
   private feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=';

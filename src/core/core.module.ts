@@ -6,6 +6,8 @@ import { VideoplaybackService } from './videoplayback/videoplayback.service';
 import { AutocompleteModule } from './autocomplete/autocomplete.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from './videos/schemas/video.schema';
+import { VideoBasicInfo, VideoBasicInfoSchema } from './videos/schemas/video-basic-info.schema';
+import { ChannelBasicInfo, ChannelBasicInfoSchema } from './channels/schemas/channel-basic-info.schema';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { Video, VideoSchema } from './videos/schemas/video.schema';
     }),
     MongooseModule.forFeature([
       { name: Video.name, schema: VideoSchema, collection: 'videos' },
+      { name: VideoBasicInfo.name, schema: VideoBasicInfoSchema, collection: 'videos-basicinfo' },
+      { name: ChannelBasicInfo.name, schema: ChannelBasicInfoSchema, collection: 'channel-basicinfo' },
     ]),
     AutocompleteModule
   ],
@@ -22,4 +26,4 @@ import { Video, VideoSchema } from './videos/schemas/video.schema';
   providers: [VideosService, VideoplaybackService],
   exports: [VideosService, VideoplaybackService]
 })
-export class CoreModule {}
+export class CoreModule { }

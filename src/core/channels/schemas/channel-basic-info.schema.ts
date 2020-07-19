@@ -15,6 +15,9 @@ export class ChannelBasicInfo extends Document {
 
   @Prop()
   authorThumbnails?: Array<AuthorThumbnailDto>
+
+  @Prop()
+  authorVerified?: boolean;
 }
 
 export const ChannelBasicInfoSchema = SchemaFactory.createForClass(ChannelBasicInfo);
