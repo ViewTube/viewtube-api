@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from './videos/schemas/video.schema';
 import { VideoBasicInfo, VideoBasicInfoSchema } from './videos/schemas/video-basic-info.schema';
 import { ChannelBasicInfo, ChannelBasicInfoSchema } from './channels/schemas/channel-basic-info.schema';
+import { ChannelsController } from './channels/channels.controller';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { ChannelBasicInfo, ChannelBasicInfoSchema } from './channels/schemas/cha
     ]),
     AutocompleteModule
   ],
-  controllers: [VideosController, VideoplaybackController],
+  controllers: [VideosController, VideoplaybackController, ChannelsController],
   providers: [VideosService, VideoplaybackService],
   exports: [VideosService, VideoplaybackService]
 })

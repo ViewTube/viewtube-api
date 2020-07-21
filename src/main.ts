@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import packageJson from "../package.json";
 import cookieParser from "cookie-parser";
+import fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -18,6 +19,11 @@ async function bootstrap() {
     origin: corsDomains,
     credentials: true
   });
+
+  global['__basedir'] = __dirname;
+  if (!fs.existsSync(__dirname + '/channels')) {
+    fs.mkdirSync(__dirname + '/channels');
+  }
 
   const documentOptions = new DocumentBuilder()
     .setTitle('ViewTube-API')
