@@ -11,8 +11,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
   const corsDomains = configService.get('VIEWTUBE_ALLOWED_DOMAINS').trim().split(',');
-  if(configService.get('NODE_ENV') !== 'production'){
-    corsDomains.push('http://localhost:8066')
+  if (configService.get('NODE_ENV') !== 'production') {
+    corsDomains.push('http://localhost:8066');
   }
   app.enableCors({
     origin: corsDomains,
