@@ -37,3 +37,4 @@ ormconfig.json
 !.vscode/extensions.json
 data/*
 output/*
+.env
