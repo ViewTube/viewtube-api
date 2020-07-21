@@ -8,7 +8,6 @@ export class ChannelsController {
   @Get('/:id/thumbnail/tiny.jpg')
   getTinyThumbnail(@Res() res: Response, @Param('id') id: string) {
     const imgPath = path.join(global['__basedir'], `channels/${id}.jpg`);
-    console.log(imgPath, id);
 
     if (fs.existsSync(imgPath)) {
       res.sendFile(imgPath);
