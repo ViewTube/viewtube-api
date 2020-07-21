@@ -112,13 +112,8 @@ export class SubscriptionsService {
   async getSubscriptionFeed(username: string): Promise<Array<VideoBasicInfoDto>> {
     const userSubscriptions = await this.subscriptionModel.findOne({ username }).lean().exec();
     if (userSubscriptions) {
-      console.log(userSubscriptions);
-      return this.videoModel.find((err, vid: VideoBasicInfo) => {
-        if (err) console.log(err)
-        return userSubscriptions.subscriptions
-          .map(channel => channel.channelId)
-          .includes(vid.authorId);
-      }).sort({ published: -1 }).limit(30).map((el: any) => {
+      const userSubscriptionIds = userSubscriptions.subscriptions.map(e => e.channelId);
+      return this.videoModel.find({ videoId: { $in: userSubscriptionIds } }).sort({ published: -1 }).limit(30).map((el: any) => {
         delete el._id;
         delete el.__v;
         return el;
