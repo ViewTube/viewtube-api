@@ -112,6 +112,7 @@ export class SubscriptionsService {
   async getSubscriptionFeed(username: string): Promise<Array<VideoBasicInfoDto>> {
     const userSubscriptions = await this.subscriptionModel.findOne({ username }).lean().exec();
     if (userSubscriptions) {
+      console.log(userSubscriptions);
       return this.videoModel.find((err, vid: VideoBasicInfo) => {
         if (err) console.log(err)
         return userSubscriptions.subscriptions
