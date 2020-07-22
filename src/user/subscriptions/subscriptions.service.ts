@@ -113,7 +113,7 @@ export class SubscriptionsService {
     const userSubscriptions = await this.subscriptionModel.findOne({ username }).lean().exec();
     if (userSubscriptions) {
       const userSubscriptionIds = userSubscriptions.subscriptions.map(e => e.channelId);
-      return this.videoModel.find({ videoId: { $in: userSubscriptionIds } }).sort({ published: -1 }).limit(30).map((el: any) => {
+      return this.videoModel.find({ authorId: { $in: userSubscriptionIds } }).sort({ published: -1 }).limit(30).map((el: any) => {
         delete el._id;
         delete el.__v;
         return el;
