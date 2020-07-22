@@ -15,14 +15,18 @@ async function bootstrap() {
   if (configService.get('NODE_ENV') !== 'production') {
     corsDomains.push('http://localhost:8066');
   }
+
   app.enableCors({
     origin: corsDomains,
     credentials: true
   });
 
   global['__basedir'] = __dirname;
-  if (!fs.existsSync(__dirname + '/channels')) {
-    fs.mkdirSync(__dirname + '/channels');
+  if (configService.get('VIEWTUBE_DATA_DIRECTORY')) {
+    global['__basedir'] = configService.get('VIEWTUBE_DATA_DIRECTORY');
+  }
+  if (!fs.existsSync(global['__basedir'] + '/channels')) {
+    fs.mkdirSync(global['__basedir'] + '/channels');
   }
 
   const documentOptions = new DocumentBuilder()
