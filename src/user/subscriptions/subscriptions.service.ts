@@ -11,6 +11,8 @@ import fetch from 'node-fetch'
 import { VideoBasicInfoDto } from 'src/core/videos/dto/video-basic-info.dto';
 import { Common } from 'src/core/common';
 import humanizeDuration from 'humanize-duration';
+import { Sorting } from 'src/common/sorting.type';
+import { ChannelBasicInfoDto } from 'src/core/channels/dto/channel-basic-info.dto';
 
 @Injectable()
 export class SubscriptionsService {
@@ -97,29 +99,40 @@ export class SubscriptionsService {
     return { likes, dislikes };
   }
 
-  async getSubscribedChannels(username: string) {
+  async getSubscribedChannels(username: string, limit: number, start: number, sort: Sorting<ChannelBasicInfoDto>) {
     const userChannelIds = (await this.subscriptionModel.findOne({ username }).exec().catch(err => {
       throw new HttpException('No subscriptions', 404);
     })).subscriptions.map(e => e.channelId);
+    console.log(sort);
     if (userChannelIds) {
-      return this.channelModel.find({ authorId: { $in: userChannelIds } }).catch(err => {
-        console.log(err);
-      })
+      return this.channelModel
+        .find({ authorId: { $in: userChannelIds } })
+        .sort(sort)
+        .limit(parseInt(limit as any))
+        .skip(parseInt(start as any))
+        .catch(err => {
+          console.log(err);
+        })
     }
     throw new HttpException('No subscriptions', 404);
   }
 
-  async getSubscriptionFeed(username: string): Promise<Array<VideoBasicInfoDto>> {
+  async getSubscriptionFeed(username: string, limit: number, start: number): Promise<Array<VideoBasicInfoDto>> {
     const userSubscriptions = await this.subscriptionModel.findOne({ username }).lean().exec();
     if (userSubscriptions) {
       const userSubscriptionIds = userSubscriptions.subscriptions.map(e => e.channelId);
-      return this.videoModel.find({ authorId: { $in: userSubscriptionIds } }).sort({ published: -1 }).limit(30).map((el: any) => {
-        delete el._id;
-        delete el.__v;
-        return el;
-      }).catch(err => {
-        throw new HttpException(`Error fetching subscription feed: ${err}`, 500);
-      });
+      return this.videoModel
+        .find({ authorId: { $in: userSubscriptionIds } })
+        .sort({ published: -1 })
+        .limit(limit)
+        .skip(start)
+        .map((el: any) => {
+          delete el._id;
+          delete el.__v;
+          return el;
+        }).catch(err => {
+          throw new HttpException(`Error fetching subscription feed: ${err}`, 500);
+        });
     }
     throw new HttpException(`Error fetching subscription feed, found no subscriptions`, 404);
   }
