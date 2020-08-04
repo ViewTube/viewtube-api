@@ -26,7 +26,7 @@ export class VideosService {
 
   async getById(id: string): Promise<VideoDto> {
     const url: string = Common.youtubeVideoUrl + id;
-    const proxy = '96.30.177.226:3128';
+    const proxy = '51.38.118.168:3128';
     const agent = HttpsProxyAgent(proxy);
     const ytdlOptions: downloadOptions = {
       requestOptions: { agent }
