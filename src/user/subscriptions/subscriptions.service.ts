@@ -100,19 +100,22 @@ export class SubscriptionsService {
   }
 
   async getSubscribedChannels(username: string, limit: number, start: number, sort: Sorting<ChannelBasicInfoDto>) {
-    const userChannelIds = (await this.subscriptionModel.findOne({ username }).exec().catch(err => {
+    const user = await this.subscriptionModel.findOne({ username }).exec().catch(err => {
       throw new HttpException('No subscriptions', 404);
-    })).subscriptions.map(e => e.channelId);
-    console.log(sort);
-    if (userChannelIds) {
-      return this.channelModel
-        .find({ authorId: { $in: userChannelIds } })
-        .sort(sort)
-        .limit(parseInt(limit as any))
-        .skip(parseInt(start as any))
-        .catch(err => {
-          console.log(err);
-        })
+    });
+    if (user) {
+      const userChannelIds = user.subscriptions.map(e => e.channelId);
+      console.log(sort);
+      if (userChannelIds) {
+        return this.channelModel
+          .find({ authorId: { $in: userChannelIds } })
+          .sort(sort)
+          .limit(parseInt(limit as any))
+          .skip(parseInt(start as any))
+          .catch(err => {
+            console.log(err);
+          })
+      }
     }
     throw new HttpException('No subscriptions', 404);
   }
