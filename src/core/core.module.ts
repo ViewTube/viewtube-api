@@ -6,6 +6,7 @@ import { VideoplaybackService } from './videoplayback/videoplayback.service';
 import { AutocompleteModule } from './autocomplete/autocomplete.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from './videos/schemas/video.schema';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -16,10 +17,11 @@ import { Video, VideoSchema } from './videos/schemas/video.schema';
     MongooseModule.forFeature([
       { name: Video.name, schema: VideoSchema, collection: 'videos' },
     ]),
-    AutocompleteModule
+    AutocompleteModule,
+    ConfigModule.forRoot(),
   ],
   controllers: [VideosController, VideoplaybackController],
   providers: [VideosService, VideoplaybackService],
   exports: [VideosService, VideoplaybackService]
 })
-export class CoreModule {}
+export class CoreModule { }

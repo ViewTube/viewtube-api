@@ -3,7 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
-import cookieParser from 'cookie-parser';
 
 @Injectable()
 export class AuthService {
