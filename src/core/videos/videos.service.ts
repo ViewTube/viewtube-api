@@ -14,6 +14,7 @@ import path from 'path';
 import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { ChannelBasicInfoDto } from '../channels/dto/channel-basic-info.dto';
+import HttpsProxyAgent from "https-proxy-agent";
 
 @Injectable()
 export class VideosService {
@@ -25,16 +26,18 @@ export class VideosService {
 
   async getById(id: string): Promise<VideoDto> {
     const url: string = Common.youtubeVideoUrl + id;
-    const ytdlOptions: downloadOptions = {}
+    const proxy = '96.30.177.226:3128';
+    const agent = HttpsProxyAgent(proxy);
+    const ytdlOptions: downloadOptions = {
+      requestOptions: { agent }
+    };
     if (this.configService.get('VIEWTUBE_YOUTUBE_COOKIE')) {
-      ytdlOptions.requestOptions = {
-        cookie: this.configService.get('VIEWTUBE_YOUTUBE_COOKIE')
-      }
+      ytdlOptions.requestOptions['cookie'] = this.configService.get('VIEWTUBE_YOUTUBE_COOKIE');
       if (this.configService.get('VIEWTUBE_YOUTUBE_IDENTIFIER')) {
-        ytdlOptions.requestOptions['x-youtube-identity-token'] = this.configService.get('VIEWTUBE_YOUTUBE_IDENTIFIER')
+        ytdlOptions.requestOptions['x-youtube-identity-token'] = this.configService.get('VIEWTUBE_YOUTUBE_IDENTIFIER');
       }
     }
-    console.log(ytdlOptions)
+    console.log(ytdlOptions);
     try {
       const result: videoInfo = await getBasicInfo(url,);
       const video: VideoDto = new VideoEntity(result);

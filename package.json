@@ -38,6 +38,7 @@
     "class-transformer": "^0.2.3",
     "cookie-parser": "^1.4.5",
     "fluent-ffmpeg": "^2.1.2",
+    "https-proxy-agent": "^5.0.0",
     "humanize-duration": "^3.22.0",
     "mongoose": "^5.9.15",
     "mysql": "^2.18.1",
