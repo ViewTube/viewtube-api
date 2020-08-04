@@ -12,4 +12,5 @@ export class VideoBasicInfoDto{
   viewCount: number;
   likeCount: number;
   dislikeCount: number;
+  lengthSeconds?: number;
 }

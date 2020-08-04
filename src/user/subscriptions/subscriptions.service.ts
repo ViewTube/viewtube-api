@@ -1,8 +1,8 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
-import { VideoDto } from 'src/core/videos/dto/video.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { VideoBasicInfo } from 'src/core/videos/schemas/video-basic-info.schema';
+import { ChannelBasicInfo } from 'src/core/channels/schemas/channel-basic-info.schema';
 import { Model } from 'mongoose';
 import { Subscription } from './schemas/subscription.schema';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -11,10 +11,16 @@ import fetch from 'node-fetch'
 import { VideoBasicInfoDto } from 'src/core/videos/dto/video-basic-info.dto';
 import { Common } from 'src/core/common';
 import humanizeDuration from 'humanize-duration';
+import { Sorting } from 'src/common/sorting.type';
+import { ChannelBasicInfoDto } from 'src/core/channels/dto/channel-basic-info.dto';
 
 @Injectable()
 export class SubscriptionsService {
-  constructor(@InjectModel(VideoBasicInfo.name) private readonly videoModel: Model<VideoBasicInfo>, @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>) { }
+  constructor(
+    @InjectModel(VideoBasicInfo.name) private readonly videoModel: Model<VideoBasicInfo>,
+    @InjectModel(ChannelBasicInfo.name) private readonly channelModel: Model<ChannelBasicInfo>,
+    @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>,
+  ) { }
 
   private feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
 
@@ -33,7 +39,15 @@ export class SubscriptionsService {
       if (data) {
         const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
         const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
-          .map((video: any) => this.convertRssVideo(video))
+          .map((video: any) => this.convertRssVideo(video));
+
+        const channel = {
+          authorId: jsonData.feed['yt:channelId'],
+          author: jsonData.feed.author.name,
+          authorUrl: jsonData.feed.author.uri
+        }
+
+        this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true }).exec().catch(console.log);
         return videos;
       }
     }).catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`)))
@@ -85,27 +99,40 @@ export class SubscriptionsService {
     return { likes, dislikes };
   }
 
-  async getSubscribedChannels(username: string) {
-    return this.subscriptionModel.find({ username }).exec().catch(err => {
+  async getSubscribedChannels(username: string, limit: number, start: number, sort: Sorting<ChannelBasicInfoDto>) {
+    const userChannelIds = (await this.subscriptionModel.findOne({ username }).exec().catch(err => {
       throw new HttpException('No subscriptions', 404);
-    })
+    })).subscriptions.map(e => e.channelId);
+    console.log(sort);
+    if (userChannelIds) {
+      return this.channelModel
+        .find({ authorId: { $in: userChannelIds } })
+        .sort(sort)
+        .limit(parseInt(limit as any))
+        .skip(parseInt(start as any))
+        .catch(err => {
+          console.log(err);
+        })
+    }
+    throw new HttpException('No subscriptions', 404);
   }
 
-  async getSubscriptionFeed(username: string): Promise<Array<VideoBasicInfoDto>> {
+  async getSubscriptionFeed(username: string, limit: number, start: number): Promise<Array<VideoBasicInfoDto>> {
     const userSubscriptions = await this.subscriptionModel.findOne({ username }).lean().exec();
     if (userSubscriptions) {
-      return this.videoModel.find((err, vid: VideoBasicInfo) => {
-        if (err) console.log(err)
-        return userSubscriptions.subscriptions
-          .map(channel => channel.channelId)
-          .includes(vid.authorId);
-      }).sort({ published: -1 }).limit(30).map((el: any) => {
-        delete el._id;
-        delete el.__v;
-        return el;
-      }).catch(err => {
-        throw new HttpException(`Error fetching subscription feed: ${err}`, 500);
-      });
+      const userSubscriptionIds = userSubscriptions.subscriptions.map(e => e.channelId);
+      return this.videoModel
+        .find({ authorId: { $in: userSubscriptionIds } })
+        .sort({ published: -1 })
+        .limit(limit)
+        .skip(start)
+        .map((el: any) => {
+          delete el._id;
+          delete el.__v;
+          return el;
+        }).catch(err => {
+          throw new HttpException(`Error fetching subscription feed: ${err}`, 500);
+        });
     }
     throw new HttpException(`Error fetching subscription feed, found no subscriptions`, 404);
   }

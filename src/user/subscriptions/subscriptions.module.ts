@@ -4,11 +4,13 @@ import { SubscriptionsService } from './subscriptions.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Subscription, SubscriptionSchema } from './schemas/subscription.schema';
 import { VideoBasicInfo, VideoBasicInfoSchema } from 'src/core/videos/schemas/video-basic-info.schema';
+import { ChannelBasicInfo, ChannelBasicInfoSchema } from 'src/core/channels/schemas/channel-basic-info.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: VideoBasicInfo.name, schema: VideoBasicInfoSchema, collection: 'videos-basicinfo' },
+      { name: ChannelBasicInfo.name, schema: ChannelBasicInfoSchema, collection: 'channel-basicinfo' },
       { name: Subscription.name, schema: SubscriptionSchema, collection: 'subscriptions' }
     ]),
   ],

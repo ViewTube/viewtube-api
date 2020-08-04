@@ -5,19 +5,29 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import packageJson from "../package.json";
 import cookieParser from "cookie-parser";
+import fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
   const corsDomains = configService.get('VIEWTUBE_ALLOWED_DOMAINS').trim().split(',');
-  if(configService.get('NODE_ENV') !== 'production'){
-    corsDomains.push('http://localhost:8066')
+  if (configService.get('NODE_ENV') !== 'production') {
+    corsDomains.push('http://localhost:8066');
   }
+
   app.enableCors({
     origin: corsDomains,
     credentials: true
   });
+
+  global['__basedir'] = __dirname;
+  if (configService.get('VIEWTUBE_DATA_DIRECTORY')) {
+    global['__basedir'] = configService.get('VIEWTUBE_DATA_DIRECTORY');
+  }
+  if (!fs.existsSync(global['__basedir'] + '/channels')) {
+    fs.mkdirSync(global['__basedir'] + '/channels');
+  }
 
   const documentOptions = new DocumentBuilder()
     .setTitle('ViewTube-API')

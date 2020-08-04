@@ -37,6 +37,9 @@ export class VideoBasicInfo extends Document implements VideoBasicInfoDto {
 
   @Prop()
   dislikeCount: number;
+
+  @Prop()
+  lengthSeconds?: number;
 }
 
 export const VideoBasicInfoSchema = SchemaFactory.createForClass(VideoBasicInfo);
