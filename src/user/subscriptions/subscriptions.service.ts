@@ -13,6 +13,9 @@ import { Common } from 'src/core/common';
 import humanizeDuration from 'humanize-duration';
 import { Sorting } from 'src/common/sorting.type';
 import { ChannelBasicInfoDto } from 'src/core/channels/dto/channel-basic-info.dto';
+import fs from 'fs';
+import { Projection, createProjectionObject } from 'src/common/projection.util';
+import path from 'path';
 
 @Injectable()
 export class SubscriptionsService {
@@ -24,33 +27,45 @@ export class SubscriptionsService {
 
   private feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async collectSubscriptionsJob(): Promise<void> {
     const users = await this.subscriptionModel.find().lean(true).exec();
     const channelIds = users.reduce((val, { subscriptions }) => [...val, ...subscriptions.map(e => e.channelId)], []);
     const uniqueChannelIds = [...new Set(channelIds)];
 
-    const feedRequests = uniqueChannelIds.map(id => fetch(this.feedUrl + id).then(response => {
-      if (response.ok) {
-        return response.text();
-      }
-      return null;
-    }).then(data => {
-      if (data) {
-        const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
-        const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
-          .map((video: any) => this.convertRssVideo(video));
+    const feedRequests = uniqueChannelIds
+      .map(id =>
+        fetch(this.feedUrl + id).then(response => {
+          if (response.ok) {
+            return response.text();
+          }
+          return null;
+        })
+          .then(data => {
+            if (data) {
+              const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
+              const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
+                .map((video: any) => this.convertRssVideo(video));
 
-        const channel = {
-          authorId: jsonData.feed['yt:channelId'],
-          author: jsonData.feed.author.name,
-          authorUrl: jsonData.feed.author.uri
-        }
+              const authorId = jsonData.feed['yt:channelId']
 
-        this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true }).exec().catch(console.log);
-        return videos;
-      }
-    }).catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`)))
+              const channel: ChannelBasicInfoDto = {
+                authorId,
+                author: jsonData.feed.author.name,
+                authorUrl: jsonData.feed.author.uri
+              }
+
+              const cachedChannelThmbPath = path.join(global['__basedir'], `channels/${authorId}.jpg`);
+              if (fs.existsSync(cachedChannelThmbPath)) {
+                channel.authorThumbnailUrl = cachedChannelThmbPath;
+              }
+
+              this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true }).exec().catch(console.log);
+              return videos;
+            }
+          })
+          .catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`))
+      );
 
     Promise.allSettled(feedRequests)
       .then((results: any) => {
@@ -60,7 +75,10 @@ export class SubscriptionsService {
             .reduce((promiseResult: any, { value }) => [...promiseResult, ...value], []);
 
           videos.forEach(element => {
-            this.videoModel.findOneAndUpdate({ videoId: element.videoId, }, element, { upsert: true }).exec().catch(console.log);
+            this.videoModel.findOneAndUpdate({ videoId: element.videoId, }, element, { upsert: true }).exec().catch(err => {
+              console.log(err);
+              console.log(element);
+            });
           })
         }
       })
@@ -77,12 +95,15 @@ export class SubscriptionsService {
       { largest: 1 },
     );
 
+    const description = video['media:group']['media:description'];
+    const descriptionText = typeof description === 'string' ? description : '';
+
     return {
       videoId: video['yt:videoId'],
       title: video.title,
       author: video.author.name,
       authorId: video['yt:channelId'],
-      description: video['media:group']['media:description'],
+      description: descriptionText,
       published: Date.parse(video.published),
       publishedText: durationString,
       videoThumbnails: Common.getVideoThumbnails(video['yt:videoId']),
