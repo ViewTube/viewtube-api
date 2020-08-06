@@ -2,7 +2,9 @@ import { Controller, Get, Param, Res, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import path from 'path';
 import { Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Core')
 @Controller('channels')
 export class ChannelsController {
   @Get('/:id/thumbnail/tiny.jpg')

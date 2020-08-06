@@ -1,5 +1,5 @@
-import { Controller, Get, Put, Param, Post, Delete, Req, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiProperty, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Put, Param, Delete, Req, UseGuards, Query } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -20,8 +20,8 @@ export class SubscriptionsController {
   @ApiQuery({ name: 'sort', type: Object, example: '{ "sort": { "author": "ASC", "authorVerified": "DESC" } }', required: false })
   async getSubscribedChannels(
     @Req() req: any,
-    @Query('limit') limit: number = 30,
-    @Query('start') start: number = 0,
+    @Query('limit') limit = 30,
+    @Query('start') start = 0,
     @Query('sort') sort: Sorting<ChannelBasicInfoDto> = {}
   ) {
     return this.subscriptionsService.getSubscribedChannels(req.user.username, limit, start, sort);
@@ -32,8 +32,8 @@ export class SubscriptionsController {
   @ApiQuery({ name: 'start', required: false })
   async getSubscriptionVideos(
     @Req() req: any,
-    @Query('limit') limit: number = 30,
-    @Query('start') start: number = 0
+    @Query('limit') limit = 30,
+    @Query('start') start = 0
   ): Promise<Array<VideoBasicInfoDto>> {
     return this.subscriptionsService.getSubscriptionFeed(req.user.username, limit, start);
   }

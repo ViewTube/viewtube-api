@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import packageJson from "../package.json";
 import cookieParser from "cookie-parser";
+import webPush from 'web-push';
 import fs from 'fs';
 
 async function bootstrap() {
@@ -15,6 +16,12 @@ async function bootstrap() {
   if (configService.get('NODE_ENV') !== 'production') {
     corsDomains.push('http://localhost:8066');
   }
+
+  webPush.setVapidDetails(
+    `mailto:${packageJson.email}`,
+    configService.get('VIEWTUBE_PUBLIC_VAPID'),
+    configService.get('VIEWTUBE_PRIVATE_VAPID')
+  );
 
   app.enableCors({
     origin: corsDomains,
