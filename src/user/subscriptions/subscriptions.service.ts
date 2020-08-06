@@ -57,10 +57,12 @@ export class SubscriptionsService {
 
               const cachedChannelThmbPath = path.join(global['__basedir'], `channels/${authorId}.jpg`);
               if (fs.existsSync(cachedChannelThmbPath)) {
-                channel.authorThumbnailUrl =  `channels/${authorId}/thumbnail/tiny.jpg`;
+                channel.authorThumbnailUrl = `channels/${authorId}/thumbnail/tiny.jpg`;
+              } else {
+                channel.authorThumbnailUrl = undefined;
               }
 
-              this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true }).exec().catch(console.log);
+              this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true }).exec().catch(console.log);
               return videos;
             }
           })
