@@ -14,7 +14,6 @@ import humanizeDuration from 'humanize-duration';
 import { Sorting } from 'src/common/sorting.type';
 import { ChannelBasicInfoDto } from 'src/core/channels/dto/channel-basic-info.dto';
 import fs from 'fs';
-import { Projection, createProjectionObject } from 'src/common/projection.util';
 import path from 'path';
 
 @Injectable()
@@ -184,7 +183,7 @@ export class SubscriptionsService {
     const user = await this.subscriptionModel.findOne({ username }).exec();
 
     const subscriptions = user ? user.subscriptions : [];
-    subscriptions.push({ channelId });
+    subscriptions.push({ channelId, createdAt: new Date() });
 
     await this.subscriptionModel
       .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true }).exec();
