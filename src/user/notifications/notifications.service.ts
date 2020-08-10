@@ -4,6 +4,7 @@ import { NotificationsSubscription } from './schemas/notifications-subscription.
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { VideoBasicInfoDto } from 'src/core/videos/dto/video-basic-info.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -19,21 +20,28 @@ export class NotificationsService {
     return notificationsSubscription.save();
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_10PM)
-  async sendNotification() {
-    const users = await this.notificationsSubscriptionModel.find().lean();
-    users.forEach(userSubscription => {
-      const payload = JSON.stringify({
-        title: 'Random Test Notification',
-        body: 'LOL HAHA'
-      });
+  async sendNotification(username: string, jsonPayload: any): Promise<void> {
+    const userSubscriptions = await this.notificationsSubscriptionModel.find({ username }).lean().exec();
+    if (userSubscriptions) {
+      const payload = JSON.stringify(jsonPayload);
 
-      webPush.sendNotification(userSubscription, payload)
-        .then(result => {
-        }, reason => {
-          console.log('rejected', reason);
-        })
-        .catch(err => console.log('error', err));
-    })
+      userSubscriptions.forEach(subscription => {
+        webPush.sendNotification(subscription, payload)
+          .then(result => {
+          }, reason => {
+            console.log('notification rejected', reason);
+          })
+          .catch(err => console.log('error', err));
+      });
+    }
+  }
+
+  async sendVideoNotification(username: string, video: VideoBasicInfoDto): Promise<void> {
+    
+    await this.sendNotification(username, {
+      title: `New video from ${video.author}`,
+      body: `${video.title}\n${video.description}`,
+      video
+    });
   }
 }
