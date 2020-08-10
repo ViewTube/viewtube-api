@@ -9,51 +9,53 @@ import { VideoThumbnailDto } from './dto/video-thumbnail.dto';
 export class VideoEntity implements VideoDto {
   constructor(private _source: Partial<videoInfo>) { }
 
+  private _videoDetails = this._source.videoDetails
+
   @Exclude()
   playerResponse = this._source.player_response;
 
   @Exclude()
-  videoDetails = this.playerResponse.videoDetails;
+  playerVideoDetails = this.playerResponse.videoDetails;
 
   @Exclude()
   microformatData = this.playerResponse.microformat.playerMicroformatRenderer;
 
   type = 'video';
 
-  title: string = this._source.title;
+  title: string = this._videoDetails.title;
 
-  videoId: string = this._source.video_id;
+  videoId: string = this._videoDetails.videoId;
 
-  videoThumbnails: Array<VideoThumbnailDto> = Common.getVideoThumbnails(this._source.video_id);
+  videoThumbnails: Array<VideoThumbnailDto> = Common.getVideoThumbnails(this._videoDetails.videoId);
 
   storyboards: Array<object> = [];
 
-  description: string = this._source.description;
+  description: string = this._videoDetails.shortDescription;
 
-  descriptionHtml: string = this._source.description;
+  descriptionHtml: string = this._videoDetails.shortDescription;
 
-  published: number = this._source.published;
+  published: number = Date.parse(this._videoDetails.publishDate);
 
   @Expose()
   get publishedText(): string {
     const durationString = humanizeDuration(
-      new Date().valueOf() - new Date(this._source.published).valueOf(),
+      new Date().valueOf() - Date.parse(this._videoDetails.publishDate).valueOf(),
       { largest: 1 },
     );
     return `${durationString} ago`;
   }
 
-  keywords: Array<string> = this.videoDetails.keywords;
+  keywords: Array<string> = this.playerVideoDetails.keywords;
 
   @Expose()
   get viewCount(): number {
-    // Result of viewCount not predicable
-    return parseFloat(this.videoDetails.viewCount.toString());
+    // Result of viewCount not predictable
+    return parseFloat(this.playerVideoDetails.viewCount.toString());
   }
 
-  likeCount: number = this._source.likes;
+  likeCount: number = this._videoDetails.likes;
 
-  dislikeCount: number = this._source.dislikes;
+  dislikeCount: number = this._videoDetails.dislikes;
 
   @Expose()
   get paid(): boolean {
@@ -64,37 +66,37 @@ export class VideoEntity implements VideoDto {
 
   isFamilyFriendly: boolean = this.microformatData.isFamilySafe;
 
-  genre: string = this._source.media.category;
+  genre: string = this._videoDetails.media.category;
 
   genreUrl: string = Common.removeYoutubeFromUrl(
-    this._source.media.category_url,
+    this._videoDetails.media.category_url,
   );
 
-  author: string = this._source.author.name;
+  author: string = this._videoDetails.author.name;
 
-  authorId: string = this._source.author.id;
+  authorId: string = this._videoDetails.author.id;
 
-  authorUrl: string = '/channel/' + this._source.author.id;
+  authorUrl: string = '/channel/' + this._videoDetails.author.id;
 
   authorThumbnails: Array<AuthorThumbnailDto> = Common.getAuthorThumbnails(
-    this._source.author.avatar,
+    this._videoDetails.author.avatar,
   );
 
-  authorVerified: boolean = this._source.author.verified;
+  authorVerified: boolean = this._videoDetails.author.verified;
 
   allowedRegions: Array<string> = this.microformatData.availableCountries;
 
-  subCount: number = this._source.author.subscriber_count;
+  subCount: number = this._videoDetails.author.subscriber_count;
 
-  lengthSeconds: number = parseInt(this._source.length_seconds) || 0;
+  lengthSeconds: number = parseInt(this._videoDetails.lengthSeconds) || 0;
 
-  allowRatings: boolean = (this.videoDetails as any)?.allowRatings;
+  allowRatings: boolean = (this.playerVideoDetails as any)?.allowRatings;
 
-  rating: string = this._source.avg_rating;
+  rating: number = this._videoDetails.averageRating;
 
   isListed = !this.microformatData.isUnlisted;
 
-  liveNow: boolean = this.videoDetails.isLiveContent;
+  liveNow: boolean = this.playerVideoDetails.isLiveContent;
 
   @Expose()
   get isUpcoming(): boolean {
@@ -108,7 +110,7 @@ export class VideoEntity implements VideoDto {
   }
 
   dashUrl: string =
-    'https://invidio.us/api/manifest/dash/id/' + this._source.video_id;
+    'https://invidio.us/api/manifest/dash/id/' + this._videoDetails.videoId;
 
   @Expose()
   get adaptiveFormats(): Array<object> {
@@ -148,7 +150,7 @@ export class VideoEntity implements VideoDto {
         label: value.name.simpleText,
         languageCode: value.languageCode,
         url: `/api/v1/captions/${
-          this._source.video_id
+          this._videoDetails.videoId
           }?label=${encodeURIComponent(value.name.simpleText)}`,
       };
     })

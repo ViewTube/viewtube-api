@@ -26,10 +26,10 @@ export class VideosService {
 
   async getById(id: string): Promise<VideoDto> {
     const url: string = Common.youtubeVideoUrl + id;
-    const proxy = '51.38.118.168:3128';
-    const agent = HttpsProxyAgent(proxy);
+    // const proxy = '51.38.118.168:3128';
+    // const agent = HttpsProxyAgent(proxy);
     const ytdlOptions: downloadOptions = {
-      requestOptions: { agent }
+      requestOptions: {}
     };
     if (this.configService.get('VIEWTUBE_YOUTUBE_COOKIE')) {
       ytdlOptions.requestOptions['cookie'] = this.configService.get('VIEWTUBE_YOUTUBE_COOKIE');
@@ -39,7 +39,7 @@ export class VideosService {
     }
     console.log(ytdlOptions);
     try {
-      const result: videoInfo = await getBasicInfo(url,);
+      const result: videoInfo = await getBasicInfo(url, ytdlOptions);
       const video: VideoDto = new VideoEntity(result);
 
 

@@ -35,7 +35,7 @@ export class Video extends Document implements VideoDto {
   subCount: number;
   lengthSeconds: number;
   allowRatings: boolean;
-  rating: string;
+  rating: number;
   isListed: boolean;
   liveNow: boolean;
   isUpcoming: boolean;
