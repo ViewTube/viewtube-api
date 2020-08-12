@@ -28,7 +28,7 @@ export class SubscriptionsService {
 
   private feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async collectSubscriptionsJob(): Promise<void> {
     const users = await this.subscriptionModel.find().lean(true).exec();
     const channelIds = users.reduce((val, { subscriptions }) => [...val, ...subscriptions.map(e => e.channelId)], []);
