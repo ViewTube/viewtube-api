@@ -5,10 +5,14 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { VideoBasicInfoDto } from 'src/core/videos/dto/video-basic-info.dto';
+import { PushNotification } from './schemas/push-notification.schema';
 
 @Injectable()
 export class NotificationsService {
-  constructor(@InjectModel(NotificationsSubscription.name) private readonly notificationsSubscriptionModel: Model<NotificationsSubscription>) { }
+  constructor(
+    @InjectModel(NotificationsSubscription.name) private readonly notificationsSubscriptionModel: Model<NotificationsSubscription>,
+    @InjectModel(PushNotification.name) private readonly pushNotificationModel: Model<PushNotification>
+  ) { }
 
   async createNotificationsSubscription(subscription: webPush.PushSubscription, username: string): Promise<NotificationsSubscription> {
     const notificationsSubscription = new this.notificationsSubscriptionModel({
@@ -37,11 +41,18 @@ export class NotificationsService {
   }
 
   async sendVideoNotification(username: string, video: VideoBasicInfoDto): Promise<void> {
-    
-    await this.sendNotification(username, {
-      title: `New video from ${video.author}`,
-      body: `${video.title}\n${video.description}`,
-      video
-    });
+    if (!(await this.pushNotificationModel.exists({ username, id: video.videoId }))) {
+      const notificationPayload = {
+        title: `New video from ${video.author}`,
+        body: `${video.title}\n${video.description}`,
+        video
+      }
+      await new this.pushNotificationModel({
+        id: video.videoId,
+        username,
+        content: notificationPayload
+      }).save();
+      await this.sendNotification(username, notificationPayload);
+    }
   }
 }

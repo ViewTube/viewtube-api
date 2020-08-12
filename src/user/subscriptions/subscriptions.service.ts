@@ -15,6 +15,7 @@ import { Sorting } from 'src/common/sorting.type';
 import { ChannelBasicInfoDto } from 'src/core/channels/dto/channel-basic-info.dto';
 import fs from 'fs';
 import path from 'path';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -22,11 +23,12 @@ export class SubscriptionsService {
     @InjectModel(VideoBasicInfo.name) private readonly videoModel: Model<VideoBasicInfo>,
     @InjectModel(ChannelBasicInfo.name) private readonly channelModel: Model<ChannelBasicInfo>,
     @InjectModel(Subscription.name) private readonly subscriptionModel: Model<Subscription>,
+    private notificationsService: NotificationsService
   ) { }
 
   private feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=';
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async collectSubscriptionsJob(): Promise<void> {
     const users = await this.subscriptionModel.find().lean(true).exec();
     const channelIds = users.reduce((val, { subscriptions }) => [...val, ...subscriptions.map(e => e.channelId)], []);
@@ -68,21 +70,39 @@ export class SubscriptionsService {
           .catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`))
       );
 
-    Promise.allSettled(feedRequests)
-      .then((results: any) => {
-        if (results.find((promiseResult: any) => promiseResult.value)) {
-          const videoValues = results.filter((promiseResult: any) => promiseResult.value);
-          const videos: Array<VideoBasicInfoDto> = videoValues
-            .reduce((promiseResult: any, { value }) => [...promiseResult, ...value], []);
+    const promiseResults = await Promise.allSettled(feedRequests);
+    if (promiseResults.find((promiseResult: any) => promiseResult.value)) {
+      const videoValues = promiseResults.filter((promiseResult: any) => promiseResult.value)
+      const videos: Array<VideoBasicInfoDto> = videoValues
+        .reduce((promiseResult: any, { value }: any) => [...promiseResult, ...value], []);
 
-          videos.forEach(element => {
-            this.videoModel.findOneAndUpdate({ videoId: element.videoId, }, element, { upsert: true }).exec().catch(err => {
-              console.log(err);
-              console.log(element);
-            });
-          })
+      await Promise.allSettled(videos.map(async element => {
+        if (!(await this.videoModel.exists({ videoId: element.videoId }))) {
+          this.sendUserNotifications(element);
+        }
+        try {
+          return this.videoModel.findOneAndUpdate({ videoId: element.videoId, }, element, { upsert: true }).exec();
+        }
+        catch (err) {
+          console.log(err);
+          console.log(element);
+        }
+      }));
+    }
+  }
+
+  async sendUserNotifications(video: VideoBasicInfoDto) {
+    const users = await this.subscriptionModel.find().lean().exec();
+    const subscribedUsers = users.filter(u => u.subscriptions.find(sub => sub.channelId === video.authorId));
+    if (subscribedUsers) {
+      subscribedUsers.forEach((user: Subscription) => {
+        const channelSubscription = user.subscriptions.find(e => e.channelId === video.authorId)
+        if (channelSubscription.createdAt && channelSubscription.createdAt.valueOf() < video.published) {
+          console.log('notification for ' + user.username);
+          this.notificationsService.sendVideoNotification(user.username, video);
         }
       })
+    }
   }
 
   convertRssVideo(video: any): VideoBasicInfoDto {

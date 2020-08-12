@@ -7,7 +7,7 @@ export class Subscription extends Document {
   username: string;
 
   @Prop({type: Array, required: true })
-  subscriptions: Array<{ channelId: string, createdAt: Date }>
+  subscriptions: Array<{ channelId: string, createdAt?: Date }>
 }
 
 export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);

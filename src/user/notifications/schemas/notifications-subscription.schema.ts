@@ -1,10 +1,10 @@
 import { Document } from "mongoose";
-import webPush from "web-push";
+import { PushSubscription } from "web-push";
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
 
 
 @Schema({ timestamps: true })
-export class NotificationsSubscription extends Document implements webPush.PushSubscription {
+export class NotificationsSubscription extends Document implements PushSubscription {
   @Prop()
   endpoint: string;
 
