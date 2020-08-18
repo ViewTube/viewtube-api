@@ -31,9 +31,13 @@ export class NotificationsService {
 
       userSubscriptions.forEach(subscription => {
         webPush.sendNotification(subscription, payload)
-          .then(result => {
+          .then(() => {
+            console.log('sent notification to ' + username)
           }, reason => {
             console.log('notification rejected', reason);
+            if (reason.statusCode === 410 || reason.statusCode === 404) {
+              this.notificationsSubscriptionModel.findOneAndDelete(subscription).exec();
+            }
           })
           .catch(err => console.log('error', err));
       });

@@ -35,40 +35,14 @@ export class SubscriptionsService {
     const uniqueChannelIds = [...new Set(channelIds)];
 
     const feedRequests = uniqueChannelIds
-      .map(id =>
-        fetch(this.feedUrl + id).then(response => {
-          if (response.ok) {
-            return response.text();
-          }
-          return null;
-        })
-          .then(data => {
-            if (data) {
-              const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
-              const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
-                .map((video: any) => this.convertRssVideo(video));
-
-              const authorId = jsonData.feed['yt:channelId']
-
-              const channel: ChannelBasicInfoDto = {
-                authorId,
-                author: jsonData.feed.author.name,
-                authorUrl: jsonData.feed.author.uri
-              }
-
-              const cachedChannelThmbPath = path.join(global['__basedir'], `channels/${authorId}.jpg`);
-              if (fs.existsSync(cachedChannelThmbPath)) {
-                channel.authorThumbnailUrl = `channels/${authorId}/thumbnail/tiny.jpg`;
-              } else {
-                channel.authorThumbnailUrl = undefined;
-              }
-
-              this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true }).exec().catch(console.log);
-              return videos;
-            }
-          })
-          .catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`))
-      );
+      .map(async id => {
+        const channelFeed = await this.getChannelFeed(id);
+        if (channelFeed) {
+          const { videos, channel } = channelFeed;
+          await this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true }).exec().catch(console.log);
+          return videos;
+        }
+      });
 
     const promiseResults = await Promise.allSettled(feedRequests);
     if (promiseResults.find((promiseResult: any) => promiseResult.value)) {
@@ -91,7 +65,43 @@ export class SubscriptionsService {
     }
   }
 
-  async sendUserNotifications(video: VideoBasicInfoDto) {
+  async getChannelFeed(channelId: string): Promise<void | { channel: ChannelBasicInfoDto, videos: Array<VideoBasicInfoDto> }> {
+    return fetch(this.feedUrl + channelId).then(response => {
+      if (response.ok) {
+        return response.text();
+      }
+      return null;
+    })
+      .then(data => {
+        if (data) {
+          const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
+          const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
+            .map((video: any) => this.convertRssVideo(video));
+
+          const authorId = jsonData.feed['yt:channelId']
+
+          const channel: ChannelBasicInfoDto = {
+            authorId,
+            author: jsonData.feed.author.name,
+            authorUrl: jsonData.feed.author.uri
+          }
+
+          const cachedChannelThmbPath = path.join(global['__basedir'], `channels/${authorId}.jpg`);
+          if (fs.existsSync(cachedChannelThmbPath)) {
+            channel.authorThumbnailUrl = `channels/${authorId}/thumbnail/tiny.jpg`;
+          } else {
+            channel.authorThumbnailUrl = undefined;
+          }
+
+          return { channel, videos };
+        } else {
+          return null;
+        }
+      })
+      .catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`))
+  }
+
+  async sendUserNotifications(video: VideoBasicInfoDto): void {
     const users = await this.subscriptionModel.find().lean().exec();
     const subscribedUsers = users.filter(u => u.subscriptions.find(sub => sub.channelId === video.authorId));
     if (subscribedUsers) {
