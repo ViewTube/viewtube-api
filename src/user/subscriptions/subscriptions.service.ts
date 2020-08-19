@@ -101,7 +101,7 @@ export class SubscriptionsService {
       .catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`))
   }
 
-  async sendUserNotifications(video: VideoBasicInfoDto): void {
+  async sendUserNotifications(video: VideoBasicInfoDto): Promise<void> {
     const users = await this.subscriptionModel.find().lean().exec();
     const subscribedUsers = users.filter(u => u.subscriptions.find(sub => sub.channelId === video.authorId));
     if (subscribedUsers) {
