@@ -39,7 +39,7 @@ export class SubscriptionsService {
         const channelFeed = await this.getChannelFeed(id);
         if (channelFeed) {
           const { videos, channel } = channelFeed;
-          await this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true }).exec().catch(console.log);
+          this.saveChannelBasicInfo(channel);
           return videos;
         }
       });
@@ -63,6 +63,14 @@ export class SubscriptionsService {
         }
       }));
     }
+  }
+
+  async saveChannelBasicInfo(channel: ChannelBasicInfoDto): Promise<ChannelBasicInfoDto | null> {
+    const savedChannel = await this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true }).exec().catch(console.log);
+    if (savedChannel) {
+      return savedChannel;
+    }
+    return null;
   }
 
   async getChannelFeed(channelId: string): Promise<void | { channel: ChannelBasicInfoDto, videos: Array<VideoBasicInfoDto> }> {
@@ -100,6 +108,7 @@ export class SubscriptionsService {
       })
       .catch(err => console.log(`Could not find channel, the following error can be safely ignored:\n${err}`))
   }
+
 
   async sendUserNotifications(video: VideoBasicInfoDto): Promise<void> {
     const users = await this.subscriptionModel.find().lean().exec();
@@ -144,15 +153,15 @@ export class SubscriptionsService {
     }
   }
 
-  convertStarsToLikesDislikes({ totalRatings, avgStarRatings }): { likes: number, dislikes: number } {
+  convertStarsToLikesDislikes({ totalRatings, avgStarRatings }: { totalRatings: number, avgStarRatings: number }): { likes: number, dislikes: number } {
     const likeRatio = (avgStarRatings - 1) / 4;
     const likes = Math.round(totalRatings * likeRatio);
     const dislikes = Math.round(totalRatings * (1 - likeRatio));
     return { likes, dislikes };
   }
 
-  async getSubscribedChannels(username: string, limit: number, start: number, sort: Sorting<ChannelBasicInfoDto>) {
-    const user = await this.subscriptionModel.findOne({ username }).exec().catch(err => {
+  async getSubscribedChannels(username: string, limit: number, start: number, sort: Sorting<ChannelBasicInfoDto>): Promise<ChannelBasicInfoDto | void> {
+    const user = await this.subscriptionModel.findOne({ username }).exec().catch(() => {
       throw new HttpException('No subscriptions', 404);
     });
     if (user) {
@@ -209,19 +218,31 @@ export class SubscriptionsService {
     }
   }
 
+  /**
+   * 
+   * @param {string} username 
+   * @param {string} channelId 
+   * 
+   * @returns {SubscriptionStatusDto} The subscription status
+   */
   async subscribeToChannel(username: string, channelId: string): Promise<SubscriptionStatusDto> {
     const user = await this.subscriptionModel.findOne({ username }).exec();
 
-    const subscriptions = user ? user.subscriptions : [];
-    subscriptions.push({ channelId, createdAt: new Date() });
+    const channelFeed = await this.getChannelFeed(channelId);
+    if (channelFeed) {
+      const channel = await this.saveChannelBasicInfo(channelFeed.channel);
 
-    await this.subscriptionModel
-      .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true }).exec();
+      const subscriptions = user ? user.subscriptions : [];
+      subscriptions.push({ channelId: channel.authorId, createdAt: new Date() });
 
-    return {
-      channelId,
-      isSubscribed: true
-    };
+      await this.subscriptionModel
+        .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true }).exec();
+
+      return {
+        channelId,
+        isSubscribed: true
+      };
+    }
   }
 
   async unsubscribeFromChannel(username: string, channelId: string): Promise<SubscriptionStatusDto> {
