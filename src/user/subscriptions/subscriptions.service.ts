@@ -55,7 +55,7 @@ export class SubscriptionsService {
           this.sendUserNotifications(element);
         }
         try {
-          return this.videoModel.findOneAndUpdate({ videoId: element.videoId, }, element, { upsert: true }).exec();
+          return this.saveVideoBasicInfo(element);
         }
         catch (err) {
           console.log(err);
@@ -67,10 +67,12 @@ export class SubscriptionsService {
 
   async saveChannelBasicInfo(channel: ChannelBasicInfoDto): Promise<ChannelBasicInfoDto | null> {
     const savedChannel = await this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true }).exec().catch(console.log);
-    if (savedChannel) {
-      return savedChannel;
-    }
-    return null;
+    return savedChannel || null;
+  }
+
+  async saveVideoBasicInfo(video: VideoBasicInfoDto): Promise<VideoBasicInfoDto | null> {
+    const savedVideo = await this.videoModel.findOneAndUpdate({ videoId: video.videoId, }, video, { upsert: true }).exec();
+    return savedVideo || null;
   }
 
   async getChannelFeed(channelId: string): Promise<void | { channel: ChannelBasicInfoDto, videos: Array<VideoBasicInfoDto> }> {
@@ -230,8 +232,16 @@ export class SubscriptionsService {
 
     const channelFeed = await this.getChannelFeed(channelId);
     if (channelFeed) {
-      const channel = await this.saveChannelBasicInfo(channelFeed.channel);
+      let channel: ChannelBasicInfoDto;
 
+      try {
+        channel = await this.saveChannelBasicInfo(channelFeed.channel);
+        await Promise.all(channelFeed.videos.map(vid => {
+          return this.saveVideoBasicInfo(vid);
+        }));
+      } catch (err) {
+        console.log(err);
+      }
       const subscriptions = user ? user.subscriptions : [];
       subscriptions.push({ channelId: channel.authorId, createdAt: new Date() });
 
