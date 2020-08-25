@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Param, Delete, Req, UseGuards, Query, Post } from '@nestjs/common';
+import { Controller, Get, Put, Param, Delete, Req, UseGuards, Query, Post, Body } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
@@ -49,8 +49,8 @@ export class SubscriptionsController {
   }
 
   @Post('multiple')
-  async createMultipleSubscriptions(@Req() req: any, @Query('channels') channels: Array<string>): Promise<void> {
-    console.log('?');
+  async createMultipleSubscriptions(@Req() req: any, @Body('channels') channels: Array<string>): Promise<Array<SubscriptionStatusDto>> {
+    console.log(channels);
     return this.subscriptionsService.subscribeToMultipleChannels(req.user.username, channels);
   }
 

@@ -16,6 +16,7 @@ import { ChannelBasicInfoDto } from 'src/core/channels/dto/channel-basic-info.dt
 import fs from 'fs';
 import path from 'path';
 import { NotificationsService } from '../notifications/notifications.service';
+import { of } from 'rxjs';
 
 @Injectable()
 export class SubscriptionsService {
@@ -66,7 +67,7 @@ export class SubscriptionsService {
   }
 
   async saveChannelBasicInfo(channel: ChannelBasicInfoDto): Promise<ChannelBasicInfoDto | null> {
-    const savedChannel = await this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true }).exec().catch(console.log);
+    const savedChannel = await this.channelModel.findOneAndUpdate({ authorId: channel.authorId, }, channel, { upsert: true, omitUndefined: true, new: true }).exec().catch(console.log);
     return savedChannel || null;
   }
 
@@ -225,22 +226,42 @@ export class SubscriptionsService {
   async subscribeToMultipleChannels(username: string, channelIds: Array<string>) {
     const successfulImports = [];
     const failedImports = [];
-    console.log('why');
-    // await Promise.allSettled(
-    //   channelIds.map((id: string) => {
-    //     return new Promise((resolve, reject) => {
-    //       this.subscribeToChannel(username, id).then(status => {
-    //         successfulImports.push(status);
-    //         resolve(status);
-    //       }).catch(err => {
-    //         reject(err);
-    //       });
-    //     });
-    //   })).then(() => {
-    //     console.log(successfulImports.length);
-    //   });
-    throw new HttpException('no', 404);
-    // return successfulImports;
+    const user = await this.subscriptionModel.findOne({ username }).exec();
+    const subscriptions = user !== null ? user.subscriptions : [];
+
+    await Promise.allSettled(
+      channelIds.map(async (id: string) => {
+        const channelFeed = await this.getChannelFeed(id);
+        if (channelFeed) {
+          let channel: ChannelBasicInfoDto;
+          try {
+            channel = await this.saveChannelBasicInfo(channelFeed.channel);
+            await Promise.all(channelFeed.videos.map(vid => {
+              return this.saveVideoBasicInfo(vid);
+            }));
+          } catch (err) {
+            failedImports.push(id);
+          }
+
+          subscriptions.push({ channelId: channel.authorId, createdAt: new Date() });
+
+          successfulImports.push(status);
+        } else {
+          failedImports.push(id);
+        }
+      })).then(() => {
+        console.log(`successful: ${successfulImports.length}`);
+        console.log(`failed: ${failedImports.length}`);
+        console.log(`subscriptions: ${subscriptions.length}`);
+        return this.subscriptionModel
+          .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true }).exec().then(result => {
+            console.log(result);
+          }, console.log)
+          .catch(err => {
+            console.log(err);
+          });
+      });
+    return successfulImports;
   }
 
   /**
@@ -268,10 +289,13 @@ export class SubscriptionsService {
       const subscriptions = user ? user.subscriptions : [];
       subscriptions.push({ channelId: channel.authorId, createdAt: new Date() });
 
-      console.log(subscriptions.length);
-
       await this.subscriptionModel
-        .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true }).exec();
+        .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true, }).exec().then(result => {
+          console.log(result);
+        }, console.log)
+        .catch(err => {
+          console.log(err);
+        });
 
       return {
         channelId,
