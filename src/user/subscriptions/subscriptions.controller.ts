@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Param, Delete, Req, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Put, Param, Delete, Req, UseGuards, Query, Post } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionStatusDto } from './dto/subscription-status.dto';
@@ -23,7 +23,7 @@ export class SubscriptionsController {
     @Query('limit') limit = 30,
     @Query('start') start = 0,
     @Query('sort') sort: Sorting<ChannelBasicInfoDto> = {}
-  ) {
+  ): Promise<Array<ChannelBasicInfoDto> | void> {
     return this.subscriptionsService.getSubscribedChannels(req.user.username, limit, start, sort);
   }
 
@@ -46,6 +46,12 @@ export class SubscriptionsController {
   @Put(':channelId')
   async createSubscription(@Req() req: any, @Param('channelId') channelId: string): Promise<SubscriptionStatusDto> {
     return this.subscriptionsService.subscribeToChannel(req.user.username, channelId);
+  }
+
+  @Post('multiple')
+  async createMultipleSubscriptions(@Req() req: any, @Query('channels') channels: Array<string>): Promise<void> {
+    console.log('?');
+    return this.subscriptionsService.subscribeToMultipleChannels(req.user.username, channels);
   }
 
   @Delete(':channelId')

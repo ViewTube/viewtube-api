@@ -85,25 +85,27 @@ export class SubscriptionsService {
       .then(data => {
         if (data) {
           const jsonData = xmlParser.toJson(data, { coerce: true, object: true }) as any;
-          const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
-            .map((video: any) => this.convertRssVideo(video));
+          if (jsonData.feed.entry) {
+            const videos: Array<VideoBasicInfoDto> = jsonData.feed.entry
+              .map((video: any) => this.convertRssVideo(video));
 
-          const authorId = jsonData.feed['yt:channelId']
+            const authorId = jsonData.feed['yt:channelId']
 
-          const channel: ChannelBasicInfoDto = {
-            authorId,
-            author: jsonData.feed.author.name,
-            authorUrl: jsonData.feed.author.uri
+            const channel: ChannelBasicInfoDto = {
+              authorId,
+              author: jsonData.feed.author.name,
+              authorUrl: jsonData.feed.author.uri
+            }
+
+            const cachedChannelThmbPath = path.join(global['__basedir'], `channels/${authorId}.jpg`);
+            if (fs.existsSync(cachedChannelThmbPath)) {
+              channel.authorThumbnailUrl = `channels/${authorId}/thumbnail/tiny.jpg`;
+            } else {
+              channel.authorThumbnailUrl = undefined;
+            }
+
+            return { channel, videos };
           }
-
-          const cachedChannelThmbPath = path.join(global['__basedir'], `channels/${authorId}.jpg`);
-          if (fs.existsSync(cachedChannelThmbPath)) {
-            channel.authorThumbnailUrl = `channels/${authorId}/thumbnail/tiny.jpg`;
-          } else {
-            channel.authorThumbnailUrl = undefined;
-          }
-
-          return { channel, videos };
         } else {
           return null;
         }
@@ -162,7 +164,7 @@ export class SubscriptionsService {
     return { likes, dislikes };
   }
 
-  async getSubscribedChannels(username: string, limit: number, start: number, sort: Sorting<ChannelBasicInfoDto>): Promise<ChannelBasicInfoDto | void> {
+  async getSubscribedChannels(username: string, limit: number, start: number, sort: Sorting<ChannelBasicInfoDto>): Promise<Array<ChannelBasicInfoDto> | void> {
     const user = await this.subscriptionModel.findOne({ username }).exec().catch(() => {
       throw new HttpException('No subscriptions', 404);
     });
@@ -220,6 +222,27 @@ export class SubscriptionsService {
     }
   }
 
+  async subscribeToMultipleChannels(username: string, channelIds: Array<string>) {
+    const successfulImports = [];
+    const failedImports = [];
+    console.log('why');
+    // await Promise.allSettled(
+    //   channelIds.map((id: string) => {
+    //     return new Promise((resolve, reject) => {
+    //       this.subscribeToChannel(username, id).then(status => {
+    //         successfulImports.push(status);
+    //         resolve(status);
+    //       }).catch(err => {
+    //         reject(err);
+    //       });
+    //     });
+    //   })).then(() => {
+    //     console.log(successfulImports.length);
+    //   });
+    throw new HttpException('no', 404);
+    // return successfulImports;
+  }
+
   /**
    * 
    * @param {string} username 
@@ -244,6 +267,8 @@ export class SubscriptionsService {
       }
       const subscriptions = user ? user.subscriptions : [];
       subscriptions.push({ channelId: channel.authorId, createdAt: new Date() });
+
+      console.log(subscriptions.length);
 
       await this.subscriptionModel
         .findOneAndUpdate({ username }, { username, subscriptions }, { upsert: true }).exec();
