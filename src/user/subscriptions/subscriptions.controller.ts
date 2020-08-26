@@ -49,7 +49,12 @@ export class SubscriptionsController {
   }
 
   @Post('multiple')
-  async createMultipleSubscriptions(@Req() req: any, @Body('channels') channels: Array<string>): Promise<Array<SubscriptionStatusDto>> {
+  async createMultipleSubscriptions(@Req() req: any, @Body('channels') channels: Array<string>):
+    Promise<{
+      successful: Array<SubscriptionStatusDto>;
+      failed: Array<SubscriptionStatusDto>;
+      existing: Array<SubscriptionStatusDto>;
+    }> {
     console.log(channels);
     return this.subscriptionsService.subscribeToMultipleChannels(req.user.username, channels);
   }
