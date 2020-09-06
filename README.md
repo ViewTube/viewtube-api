@@ -1,3 +1,5 @@
+This repo has been merged with the [main ViewTube repository](https://github.com/ViewTube/viewtube-vue).
+
 <h1 align="left">ViewTube API<img src="./icon.svg" alt="" width="24" height="24" align="left" /></h1>
 
 
